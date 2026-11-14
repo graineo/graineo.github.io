@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Under the hood – graineo</title>
+<meta name="description" content="How fast it is, what runs where, what goes online, what your computer needs.">
+<link rel="canonical" href="https://graineo.github.io/en/under-the-hood/">
+<link rel="alternate" hreflang="en" href="https://graineo.github.io/en/under-the-hood/">
+<link rel="alternate" hreflang="de" href="https://graineo.github.io/de/under-the-hood/">
+<link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/under-the-hood/">
+<link rel="alternate" hreflang="es" href="https://graineo.github.io/es/under-the-hood/">
+<link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/under-the-hood/">
+<link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/under-the-hood/">
+<link rel="icon" type="image/svg+xml" href="../../img/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../../img/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="graineo">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="Under the hood – graineo">
+<meta property="og:description" content="How fast it is, what runs where, what goes online, what your computer needs.">
+<meta property="og:url" content="https://graineo.github.io/en/under-the-hood/">
+<meta property="og:image" content="https://graineo.github.io/img/og-en-under-the-hood.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The graineo wordmark above a contact sheet of photographs on paper.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ebe6da">
+<link rel="preload" href="../../fonts/syne-500.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Syne";src:url("../../fonts/syne-500.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("../../fonts/plex-mono-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("../../fonts/plex-mono-500.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Serif";src:url("../../fonts/plex-serif-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Serif";src:url("../../fonts/plex-serif-400i.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"IBM Plex Sans JP";src:url("../../fonts/plex-sans-jp.woff2") format("woff2");font-weight:400 500;font-style:normal;font-display:swap;unicode-range:U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF}
+</style>
+<style>
+/* graineo Projektseite – Richtung B „Kontaktbogen“. Wird von scripts/site-bauen.py eingesetzt. */
+:root{
+  --blau:#2E6DC2; --gruen:#6AA864; --rot:#E14C2D;
+  --papier:#ebe6da; --papier2:#e2dccd; --tinte:#1c1b18; --text2:#3a3731; --dim:#6b665c; --linie:#cbc3b1;
+  --film:#17130f; --kante:#d8a043; --stift:#c8402a; --abzug:#fbfaf6;
+  --syne:"Syne","IBM Plex Sans JP",system-ui,sans-serif;
+  --mono:"IBM Plex Mono","IBM Plex Sans JP",ui-monospace,Menlo,monospace;
+  --serif:"IBM Plex Serif","IBM Plex Sans JP",Georgia,serif;
+  --rand:clamp(16px,4vw,48px);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html,body{margin:0;background:var(--papier)}
+body{overflow-x:clip}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration-color:var(--stift);text-underline-offset:3px}
+a:hover{color:#000}
+.rb{color:var(--tinte);font:17px/1.6 var(--serif);background-color:var(--papier);overflow-x:clip;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .3  0 0 0 0 .22  0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>")}
+.seite{max-width:1180px;margin:0 auto;padding:0 var(--rand)}
+.wm{display:block;height:auto;color:inherit}
+.weg{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+.weg:focus{left:var(--rand);top:8px;width:auto;height:auto;z-index:60;background:var(--abzug);padding:8px 12px;font:13px var(--mono)}
+
+/* Kopf */
+.kopf{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 0;border-bottom:1px solid var(--linie);font:12px/1.3 var(--mono);color:var(--dim)}
+.kopf .wm{width:116px;color:var(--tinte)}
+.kopf .rechts{display:flex;align-items:center;gap:22px;min-width:0}
+.kopf .hauptnav{position:static}
+.menueliste{display:flex;align-items:center;gap:26px;white-space:nowrap;letter-spacing:.06em}
+.menuknopf{display:none}
+.kopf .menueliste a{text-decoration:none;white-space:nowrap;padding:6px 0;border-bottom:1.5px solid transparent;line-height:1.3}
+.kopf .menueliste a:hover{color:var(--tinte)}
+.sprachen{position:relative;flex:none;font:12px/1 var(--mono);letter-spacing:.06em;color:var(--tinte)}
+.sprachknopf{display:flex;align-items:center;gap:7px;font:inherit;letter-spacing:inherit;color:inherit;background:transparent;border:1px solid var(--linie);border-radius:999px;padding:8px 11px 8px 10px;cursor:pointer;transition:border-color .15s,background .15s}
+.sprachknopf:hover,.sprachen.offen .sprachknopf{border-color:var(--dim);background:var(--abzug)}
+.sprachknopf:focus-visible,.menuknopf:focus-visible,.sprachliste a:focus-visible,.menueliste a:focus-visible{outline:2px solid var(--blau);outline-offset:2px}
+.sprachknopf .pfeil{transition:transform .2s}.sprachen.offen .pfeil{transform:rotate(180deg)}
+.sprachliste{position:absolute;right:0;top:calc(100% + 8px);z-index:40;min-width:156px;margin:0;padding:6px;list-style:none;background:var(--abzug);border:1px solid var(--linie);border-radius:12px;box-shadow:0 14px 36px -12px rgba(40,30,10,.28);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease,visibility 0s .18s}
+.sprachen.offen .sprachliste{opacity:1;visibility:visible;transform:none;transition:opacity .18s ease,transform .18s ease}
+.sprachliste a{display:block;padding:9px 12px;border-radius:8px;text-decoration:none;font:13px/1.2 var(--mono);letter-spacing:0;color:var(--text2)}
+.sprachliste a:hover,.sprachliste a:focus-visible{background:var(--papier);color:var(--tinte)}
+.sprachliste a[aria-current="true"]{color:var(--tinte);background:var(--papier2);position:relative}
+.sprachliste a[aria-current="true"]::after{content:"";position:absolute;right:12px;top:50%;width:5px;height:9px;margin-top:-6px;border:solid var(--stift);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+
+
+ 
+@media (max-width:860px){
+  .kopf .menuknopf{display:flex;align-items:center;gap:8px;font:inherit;letter-spacing:.06em;color:var(--tinte);background:transparent;border:1px solid var(--linie);border-radius:999px;padding:8px 12px;cursor:pointer}
+  .kopf .menuknopf:hover,.hauptnav.offen .menuknopf{border-color:var(--dim);background:var(--abzug)}
+  .menueliste{position:absolute;left:0;right:0;top:calc(100% + 1px);z-index:40;flex-direction:column;align-items:stretch;gap:0;padding:8px 0 12px;background:var(--abzug);border-bottom:1px solid var(--linie);box-shadow:0 18px 30px -18px rgba(40,30,10,.3);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease,visibility 0s .18s}
+  .hauptnav.offen .menueliste{opacity:1;visibility:visible;transform:none;transition:opacity .18s ease,transform .18s ease}
+  .kopf .menueliste a{padding:13px var(--rand);font-size:14px;border-bottom:0}
+  .kopf .menueliste a[aria-current="page"]{border-bottom:0;box-shadow:inset 3px 0 0 var(--stift);background:var(--papier)}
+  .kopf .rechts{gap:10px}
+}
+
+/* Held */
+.held{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(28px,5vw,64px);align-items:center;padding:clamp(48px,8vw,96px) 0 clamp(40px,6vw,72px)}
+.notiz{font:12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+h1{font:500 clamp(34px,6vw,72px)/1.02 var(--syne);letter-spacing:-.02em;margin:14px 0 20px}
+.lead{margin:0 0 26px;font-size:clamp(17px,1.9vw,20px);color:var(--text2)}
+.knopf{display:inline-block;font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;padding:12px 18px;border:1.5px solid var(--tinte);color:var(--tinte);margin:0 8px 8px 0}
+.knopf.haupt{background:var(--tinte);color:var(--papier)}
+.knopf.haupt:hover{color:#fff}
+@media (max-width:760px){.held{grid-template-columns:minmax(0,1fr)}}
+
+/* Kontaktbogen */
+.bogen{background:var(--film);padding:clamp(8px,1.6vw,14px);box-shadow:0 1px 0 rgba(0,0,0,.08),0 18px 40px -18px rgba(40,30,15,.45);position:relative}
+.bogen .reihe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(4px,.8vw,8px);padding:clamp(10px,1.6vw,16px) 0;position:relative}
+.bogen .reihe::before,.bogen .reihe::after{content:"";position:absolute;left:0;right:0;height:clamp(4px,.7vw,6px);background:repeating-linear-gradient(90deg,transparent 0 6px,#3b332a 6px 13px,transparent 13px 17px)}
+.bogen .reihe::before{top:2px}.bogen .reihe::after{bottom:2px}
+.bogen figure{margin:0;position:relative}
+.bogen img{width:100%;aspect-ratio:3/2;object-fit:cover}
+.bogen figcaption{font:clamp(7px,.9vw,9px)/1.2 var(--mono);color:var(--kante);letter-spacing:.1em;padding-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bogen .kreis{position:absolute;inset:-14% -12%;width:124%;height:128%;pointer-events:none;overflow:visible}
+.bogen .kreuz{position:absolute;right:-4px;top:-8px;font:600 20px/1 var(--mono);color:var(--stift);transform:rotate(8deg);pointer-events:none}
+
+/* Vorher/Nachher */
+.vgl-abzug{margin:clamp(8px,2vw,24px) 0 clamp(48px,8vw,96px)}
+.vgl{position:relative;margin:0;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:pan-y;--p:50%}
+.vgl img{width:100%;height:auto}
+.vgl .oben{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--p)) 0 0)}
+.vgl .oben img{width:100%;height:100%;object-fit:cover}
+.vgl .strich{position:absolute;top:0;bottom:0;left:var(--p);width:2px;margin-left:-1px;background:#f2efe6;box-shadow:0 0 0 1px rgba(0,0,0,.3);pointer-events:none}
+.vgl .strich::after{content:"";position:absolute;top:50%;left:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:2px solid #f2efe6;background:rgba(10,10,12,.35)}
+.vgl input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.vgl input:focus-visible+.strich{background:var(--kante)}
+.vgl .marke{position:absolute;bottom:12px;font:11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:6px 8px;background:rgba(8,8,10,.6);color:#f2efe6;pointer-events:none}
+.vgl .marke.l{left:12px}.vgl .marke.r{right:12px}
+
+/* Abschnitte als Abzüge */
+.abschnitt{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(28px,6vw,80px);align-items:center;padding:clamp(48px,8vw,96px) 0;border-top:1px solid var(--linie)}
+.abschnitt.um>.abzug,.abschnitt.um>.abzuege{order:2}
+.abschnitt.oben{align-items:start}
+.unter{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(28px,6vw,80px);align-items:start;padding:0 0 clamp(48px,8vw,96px)}
+.unter.um>.abzug,.unter.um>.abzuege{order:2}
+.abzug{margin:0;background:var(--abzug);padding:clamp(10px,1.6vw,16px) clamp(10px,1.6vw,16px) 0;box-shadow:0 1px 1px rgba(0,0,0,.08),0 14px 30px -14px rgba(50,35,15,.4);transform:rotate(-1.1deg)}
+.um>.abzug,.abzug.r{transform:rotate(.9deg)}
+.abzug.gerade{transform:none}
+.abzug figcaption{font:italic 15px/1.35 var(--serif);color:#5c574d;padding:12px 2px 14px;display:flow-root}
+.abzug figcaption span{font:11px/1.6 var(--mono);font-style:normal;letter-spacing:.06em;color:#8b8579;float:right;margin-left:12px}
+.abzuege{display:grid;gap:clamp(24px,4vw,40px)}
+[data-zoom]{cursor:zoom-in}
+.label{font:12px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:10px}
+.label::before{content:"";width:22px;height:1.5px;background:var(--stift);flex:none}
+h2{font:500 clamp(28px,4vw,46px)/1.06 var(--syne);letter-spacing:-.015em;margin:14px 0 16px}
+h3{font:500 clamp(20px,2.4vw,26px)/1.15 var(--syne);letter-spacing:-.01em;margin:0 0 12px}
+.text p{margin:0 0 14px}
+.klein{font:13px/1.55 var(--mono);color:var(--dim)}
+.text p.klein{font:13px/1.55 var(--mono);color:var(--dim)}
+ul.liste{margin:18px 0 0;padding:0;list-style:none;font:13.5px/1.5 var(--mono);color:#3f3b34}
+ul.liste li{padding:8px 0 8px 22px;border-bottom:1px dashed var(--linie);position:relative}
+ul.liste li::before{content:"";position:absolute;left:2px;top:14px;width:9px;height:9px;border:1.5px solid var(--tinte);border-radius:50%}
+ul.liste b{font-weight:500;color:var(--tinte)}
+@media (max-width:760px){
+  .abschnitt,.unter{grid-template-columns:minmax(0,1fr)}
+  .abschnitt.um>.abzug,.abschnitt.um>.abzuege,.unter.um>.abzug,.unter.um>.abzuege{order:0}
+}
+
+/* Platzhalter (vor dem Veröffentlichen ersetzen) */
+.platzhalter{display:flex;align-items:center;justify-content:center;text-align:center;min-height:220px;border:2px dashed var(--stift);color:var(--stift);font:13px/1.5 var(--mono);padding:24px;background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(200,64,42,.05) 14px 28px)}
+span.platzhalter{display:inline;min-height:0;border-width:1px;padding:0 4px}
+
+/* Zahlen */
+.zahlen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 28px;margin-top:26px;font:13px/1.4 var(--mono);color:var(--dim)}
+.zahlen b{display:block;font:500 clamp(22px,2.6vw,28px)/1.1 var(--syne);color:var(--tinte);margin-bottom:6px;white-space:nowrap}
+@media (max-width:600px){.zahlen{grid-template-columns:minmax(0,1fr)}}
+
+/* Filmbogen */
+.filmbogen{padding:clamp(48px,8vw,96px) 0;border-top:1px solid var(--linie)}
+.filmbogen .bogen{transform:rotate(-.4deg);margin-top:24px}
+.filmbogen .platzhalter{margin-top:28px}
+@media (max-width:520px){.filmbogen .bogen .reihe{grid-template-columns:repeat(2,minmax(0,1fr))}.filmbogen .bogen figcaption{font-size:8px}}
+
+/* Blöcke allgemein */
+.block{padding:clamp(48px,8vw,96px) 0;border-top:1px solid var(--linie)}
+.block>.einl{max-width:760px;font-size:clamp(17px,1.9vw,20px);color:var(--text2);margin:0 0 8px}
+
+/* Galerie */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 26px}
+.chips button{font:12px/1 var(--mono);letter-spacing:.06em;color:var(--tinte);background:transparent;border:1.5px solid var(--linie);padding:8px 12px;cursor:pointer}
+.chips button:hover{border-color:var(--tinte)}
+.chips button.an{background:var(--tinte);border-color:var(--tinte);color:var(--papier)}
+.chips .sp{flex-basis:12px}
+.galerie{columns:3 250px;column-gap:clamp(16px,2.4vw,28px)}
+.galerie figure{break-inside:avoid;margin:0 0 clamp(20px,3vw,32px)}
+.galerie figure[hidden]{display:none}
+.galerie .abzug:nth-child(3n+1){transform:rotate(-.7deg)}
+.galerie .abzug:nth-child(3n+2){transform:rotate(.5deg)}
+.galerie .abzug:nth-child(3n){transform:rotate(-.2deg)}
+.galerie figcaption{font-size:14px}
+.galerie figcaption b{display:block;font:500 11.5px/1.5 var(--mono);font-style:normal;letter-spacing:.04em;color:var(--tinte)}
+
+/* Funktionen */
+.fgroup{margin-top:34px}
+.fgroup[hidden]{display:none}
+h3.fh{font:500 12px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:10px;margin:0 0 18px}
+h3.fh::before{content:"";width:22px;height:1.5px;background:var(--stift)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:clamp(18px,2.4vw,26px)}
+.tile{background:var(--abzug);padding:10px 10px 0;box-shadow:0 1px 1px rgba(0,0,0,.07),0 10px 22px -14px rgba(50,35,15,.4);display:flex;flex-direction:column}
+.tile .vis{position:relative;aspect-ratio:16/9;background:#141210;display:flex;align-items:center;justify-content:center;color:#a39d90;overflow:hidden}
+.tile .vis img{width:100%;height:100%;object-fit:cover}
+.tile .vis .dia{width:100%;height:100%;display:block}
+.tile .vis .ic{width:56px;height:56px;color:var(--kante)}
+.tile h4{font:500 15px/1.3 var(--mono);margin:14px 6px 6px}
+.tile p{margin:0 6px 16px;color:var(--text2);font-size:15px;line-height:1.5}
+.pills{display:flex;flex-wrap:wrap;gap:6px;padding:12px;justify-content:center}
+.pills span{font:12px var(--mono);border:1px solid #3b352d;padding:4px 8px;color:#e8e2d4}
+.dia{--dim:#a39d90;--gold:#d8a043;--line:#4a4339;--panel:#1d1a16}
+@media (max-width:520px){.tiles{grid-template-columns:minmax(0,1fr)}}
+
+/* Mehr */
+.mehr{columns:2 300px;column-gap:40px;padding:0;margin:20px 0 0;list-style:none;font-size:16px}
+.mehr li{break-inside:avoid;padding:9px 0;border-bottom:1px dashed var(--linie);color:var(--text2)}
+.mehr b{font-weight:500;color:var(--tinte);font-family:var(--mono);font-size:14px}
+
+/* Farbtreue */
+.ca{margin-top:22px}
+.ca-h{font:500 15px/1.3 var(--mono);margin:30px 0 8px;color:var(--tinte)}
+.ca-h span{color:var(--dim);font-weight:400;font-size:13px;margin-left:6px}
+.ca-row{display:grid;grid-template-columns:150px 50px minmax(0,1fr) 230px 90px;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--linie);font-family:var(--mono)}
+.ca-th{color:var(--dim);font:12px/1.3 var(--mono)}
+.ca-name{font:14px/1.3 var(--mono)}.ca-name small{color:var(--dim);font-size:12px}
+.ca-n,.ca-max{color:var(--dim);font:13px var(--mono);text-align:right}
+.ca-bar{height:10px;background:var(--papier2);border-radius:5px;overflow:hidden}
+.ca-bar i{display:block;height:100%;border-radius:5px}
+.ca-val b{font:500 14px var(--mono);margin-right:8px}.ca-val span{color:var(--dim);font-size:13px}
+i.ok{background:#4f9a66}i.near{background:#b8a83a}i.mid{background:#d08a3c}i.bad{background:#c8402a}
+.ca-box{margin-top:14px;padding:16px 18px;background:var(--abzug);box-shadow:0 1px 1px rgba(0,0,0,.07);max-width:760px}
+.ca-box h3{margin:0 0 6px;font-size:18px}.ca-box p{margin:0 0 10px;color:var(--text2);font-size:15px}
+.ca-key{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px;font:13px var(--mono);color:var(--dim)}
+.ca-key i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+@media (max-width:760px){.ca-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 12px}.ca-th{display:none}.ca-bar{grid-column:1/3;order:3}.ca-val{grid-column:1/2;order:4}.ca-max{order:5;text-align:right}.ca-name{order:1}.ca-n{order:2}.ca-n::after{content:" " attr(data-u)}.ca-max::before{content:attr(data-w) " "}}
+
+/* Fragen */
+.fragen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(28px,5vw,64px);margin-top:20px}
+.fragen div{padding:16px 0;border-bottom:1px dashed var(--linie)}
+.fragen h3{font:500 15px/1.4 var(--mono);margin:0 0 6px}
+.fragen p{margin:0;color:var(--text2);font-size:16px}
+@media (max-width:760px){.fragen{grid-template-columns:minmax(0,1fr)}}
+
+/* Laden */
+.laden{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(28px,6vw,80px);align-items:start}
+@media (max-width:760px){.laden{grid-template-columns:minmax(0,1fr)}}
+pre{background:var(--film);color:#e8e2d4;padding:16px;overflow:auto;font:13px/1.6 var(--mono);margin:12px 0}
+code{font:14px var(--mono)}
+.rueck{list-style:none;padding:0;margin:14px 0 0;font:14px/1.5 var(--mono)}
+.rueck li{padding:10px 0;border-bottom:1px dashed var(--linie)}
+.rueck b{font-weight:500}
+.rueck span{display:block;color:var(--dim);font-size:13px}
+
+/* Grundlage */
+.credits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px;margin-top:20px}
+.credits div{padding:11px 0;border-bottom:1px dashed var(--linie);font-size:15px}
+.credits a{font-family:var(--mono);font-size:14px}
+.credits span{color:var(--text2)}
+@media (max-width:760px){.credits{grid-template-columns:minmax(0,1fr)}}
+
+/* Fuß */
+.fuss{border-top:2px solid var(--tinte);margin-top:24px;padding:28px 0 56px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:28px;align-items:start;font:12px/1.6 var(--mono);color:var(--dim)}
+.fuss .wm{width:96px;color:var(--tinte)}
+.fuss p{margin:0 0 8px}
+.fuss .ueber{font:italic 15px/1.55 var(--serif);color:var(--text2);max-width:640px;margin-bottom:14px}
+.fuss .ueber b{font-style:normal;font-weight:400;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tinte);display:block;margin-bottom:4px}
+.stempel{border:1.5px solid var(--stift);color:var(--stift);padding:8px 12px;transform:rotate(-4deg);text-transform:uppercase;letter-spacing:.12em;font-size:11px;text-align:center;line-height:1.5}
+.fuss .sprachen{margin-top:12px;display:inline-block}
+.fuss .sprachliste{right:auto;left:0;top:auto;bottom:calc(100% + 8px);transform:translateY(6px)}
+.fuss .sprachen.offen .sprachliste{transform:none}
+@media (max-width:760px){.fuss{grid-template-columns:minmax(0,1fr)}.stempel{justify-self:start}}
+
+/* Japanisch */
+.rb:lang(ja){word-break:auto-phrase;line-break:strict}
+.rb:lang(ja) h1,.rb:lang(ja) h2,.rb:lang(ja) h3{letter-spacing:0;line-height:1.3}
+.rb:lang(ja) h1{font-size:clamp(28px,5vw,60px)}
+.rb:lang(ja) .notiz,.rb:lang(ja) .label{letter-spacing:.06em}
+.rb:lang(ja) .abzug figcaption,.rb:lang(ja) .fuss .ueber{font-style:normal}
+
+/* Leuchtkasten */
+#lb{position:fixed;inset:0;z-index:50;display:none;background:#0e0c0a;overflow:hidden;overscroll-behavior:contain;width:100vw;height:100vh;height:100dvh;box-sizing:border-box;align-items:center;justify-content:center;flex-direction:column;padding:16px;color:#ece6d8;font-family:var(--mono)}
+#lb.open{display:flex}
+#lb .bildfeld{flex:1 1 auto;min-height:0;min-width:0;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#lb .bildfeld>img{display:block;width:auto;height:auto;max-width:calc(100vw - 132px);max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px);object-fit:contain}
+@media (max-width:600px){#lb .bildfeld>img{max-width:calc(100vw - 32px);max-height:calc(100dvh - 210px)}}
+#lb .unten{flex:none}
+#lb .unten{padding-top:12px;text-align:center;max-width:900px}
+#lb .kam{font-size:14px;font-weight:500}
+#lb .fx{font:italic 15px var(--serif);color:#b9b2a3}
+#lb .zahl{font-size:12px;color:#8f887a;margin-top:4px}
+#lb .vgl{position:relative;overflow:hidden;touch-action:none;flex:none}
+#lb .vgl img{position:absolute;left:0;top:0;max-width:none;max-height:none;pointer-events:none;-webkit-user-drag:none}
+#lb .vgl .c{position:absolute;inset:0;overflow:hidden;display:none}
+#lb .vgl.m100 .c{display:block}
+#lb .vgl.m100>img{display:none}
+#lb .vgl .ebene{position:absolute;left:0;top:0;width:0;height:0}
+#lb .vgl .ebene img{position:absolute;max-width:none;max-height:none}
+#lb .vgl.pan{cursor:grab}
+#lb .vgl.pan.zieht{cursor:grabbing}
+#lb .vgl .lbl{position:absolute;bottom:10px;font-size:12px;line-height:1;padding:5px 8px;background:rgba(10,10,12,.7);color:#f2efe6;pointer-events:none}
+#lb .vgl .lbl.l{left:10px}
+#lb .vgl .lbl.r{right:10px}
+#lb .vgl .griff{position:absolute;top:0;bottom:0;width:44px;margin-left:-22px;cursor:ew-resize;touch-action:none}
+#lb .vgl .griff::before{content:"";position:absolute;left:21px;top:0;bottom:0;width:2px;background:#f2f0ea;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#lb .vgl .griff i{position:absolute;left:6px;top:50%;width:32px;height:32px;margin-top:-16px;border-radius:50%;background:#f2f0ea;box-shadow:0 0 0 1px rgba(0,0,0,.35);color:#111;font-size:13px;line-height:32px;text-align:center;font-style:normal}
+#lb .vgl .griff i::before{content:"\2039\00a0\203A"}
+#lb button{z-index:3;position:absolute;background:rgba(20,18,16,.8);color:#ece6d8;border:1px solid #3b352d;width:44px;height:44px;font:inherit;font-size:22px;cursor:pointer}
+#lb button:hover{border-color:#6b6357}
+#lb .zu{top:14px;right:14px}
+#lb .vor{left:14px;top:50%;transform:translateY(-50%)}
+#lb .weiter{right:14px;top:50%;transform:translateY(-50%)}
+#lb button.hundert{position:static;width:auto;height:32px;padding:0 12px;font-size:13px;margin-top:8px}
+#lb button.hundert.an{background:var(--kante);border-color:var(--kante);color:#17130a}
+@media (max-width:600px){#lb .vor,#lb .weiter{top:auto;bottom:14px;transform:none}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+.rueck span.platzhalter{display:inline;font-size:inherit;color:var(--stift)}
+
+/* Ausschnitt / Lupe für Bildschirmfotos:
+   Vollbild + Lupe:  <figure class="abzug"> <img Vollbild> <span class="lupe"><img Ausschnitt></span> <figcaption>…
+   nur Ausschnitt:   <figure class="abzug ausschnitt"> <img vergrößerte Stelle> <figcaption>…  (Seitenverhältnis 4:3) */
+.abzug{position:relative}
+.abzug .lupe{position:absolute;right:-18px;bottom:52px;width:44%;background:var(--abzug);padding:6px;box-shadow:0 1px 1px rgba(0,0,0,.1),0 12px 24px -10px rgba(50,35,15,.5);transform:rotate(2.2deg)}
+.abzug .lupe img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.abzug .lupe::before{content:"";position:absolute;left:-10px;top:-10px;width:18px;height:18px;border:1.5px solid var(--stift);border-radius:50%;background:var(--abzug)}
+.abzug.ausschnitt>img{aspect-ratio:4/3;object-fit:cover}
+@media (max-width:760px){.abzug .lupe{position:relative;right:auto;bottom:auto;width:62%;margin:-28px 0 0 auto;display:block}}
+
+/* Der Name im Fließtext in der Schrift der Wortmarke (Syne Medium), Größe nach Augenmaß an die x-Höhe angeglichen */
+.name{font-family:"Syne",sans-serif;font-weight:500;font-style:normal;font-size:var(--name-groesse,1.06em);letter-spacing:0;text-transform:none;color:inherit;white-space:nowrap}
+
+/* Bildserien: ein Bild auf der Seite, im Leuchtkasten eine ganze Serie */
+.vis.stapel{cursor:zoom-in;box-shadow:4px -4px 0 -1px #2a251f,8px -8px 0 -2px #3a332a;margin:8px 8px 0 0;overflow:visible}
+.vis.stapel>img{position:relative}
+.serie-zahl{position:absolute;right:6px;bottom:6px;font:11px/1 var(--mono);letter-spacing:.06em;color:#f2efe6;background:rgba(10,10,12,.7);padding:4px 6px}
+.vis.stapel:focus-visible{outline:2px solid var(--stift);outline-offset:3px}
+#lb.serienansicht .fx{font-style:normal;font-family:var(--serif);max-width:720px;margin:4px auto 0}
+#lb [hidden]{display:none!important}
+
+/* Kopf beim Scrollen oben angeheftet: Papiergrund über die ganze Breite, etwas kompakter */
+.kopf{position:sticky;top:0;z-index:30;padding:14px 0;border-bottom:1px solid var(--linie)}
+.kopf::before{content:"";position:absolute;top:0;bottom:0;left:-100vmax;right:-100vmax;background:var(--papier);z-index:-1}
+.kopf::after{content:"";position:absolute;left:-100vmax;right:-100vmax;bottom:-7px;height:6px;background:linear-gradient(rgba(60,45,20,.08),transparent);pointer-events:none}
+.kopf .wm{width:104px}
+[id]{scroll-margin-top:84px}
+@media (max-width:860px){[id]{scroll-margin-top:96px}}
+@media (max-width:520px){.kopf{padding:10px 0}.kopf .wm{width:92px}}
+
+/* Bildmodelle */
+.modelle table{width:100%;border-collapse:collapse;font:13px/1.5 var(--mono);color:var(--text2)}
+.modelle th{text-align:left;font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:8px 12px 8px 0;border-bottom:1.5px solid var(--tinte)}
+.modelle td{vertical-align:top;padding:10px 12px 10px 0;border-bottom:1px dashed var(--linie)}
+.modelle td:first-child{width:28%;color:var(--tinte)}
+.modelle td b{font-weight:500}
+@media (max-width:760px){
+  .modelle thead{display:none}
+  .modelle table,.modelle tbody,.modelle tr,.modelle td{display:block;width:auto!important}
+  .modelle tr{padding:10px 0;border-bottom:1px dashed var(--linie)}
+  .modelle td{border:0;padding:2px 0}
+  .modelle td:not(:first-child)::before{content:attr(data-l) ": ";color:var(--dim);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+}
+.zahlen b.neu-messen{font:500 15px/1.3 var(--mono);color:var(--stift);white-space:normal}
+
+/* Unterseiten */
+.seitenkopf{padding:clamp(40px,7vw,88px) 0 clamp(16px,3vw,32px)}
+.seitenkopf h1{margin:10px 0 14px}
+.seitenkopf .lead{max-width:760px}
+.teilseite[hidden]{display:none}
+.saeulen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(40px,6vw,80px) clamp(28px,5vw,64px);padding:clamp(48px,8vw,96px) 0;border-top:1px solid var(--linie)}
+.saeule .abzug{margin-bottom:26px}
+.saeule h2{font-size:clamp(24px,3vw,34px)}
+.saeule p{margin:0 0 14px}
+.mehr-link{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border-bottom:1.5px solid var(--stift);padding-bottom:3px}
+@media (max-width:760px){.saeulen{grid-template-columns:minmax(0,1fr)}}
+.bogen.streifen .reihe{grid-template-columns:repeat(6,minmax(0,1fr))}
+@media (max-width:600px){.bogen.streifen .reihe{grid-template-columns:repeat(3,minmax(0,1fr))}}
+#strip .bogen{margin:18px 0 22px}
+.ueber-text{font:italic clamp(18px,2vw,21px)/1.6 var(--serif);color:var(--text2);max-width:780px;margin:14px 0 0}
+.rb:lang(ja) .ueber-text{font-style:normal}
+.kopf .menueliste a[aria-current="page"]{color:var(--tinte);border-bottom:1.5px solid var(--stift)}
+
+/* Wie spektrafilm funktioniert */
+.spektral{padding:clamp(24px,4vw,48px) 0 clamp(40px,6vw,72px)}
+.spektral .lead{max-width:760px;margin-bottom:22px}
+.kette{margin:0 0 26px;padding:22px clamp(14px,3vw,30px) 14px;background:var(--abzug);border:1px solid var(--linie);border-radius:4px}
+.kette svg{width:100%;max-width:760px;height:auto;margin:0 auto}
+.kette .pfeile{stroke:var(--dim)}
+.kette figcaption{margin-top:12px;text-align:center;font:12px/1.5 var(--mono);letter-spacing:.04em;color:var(--dim)}
+.schritte{list-style:none;counter-reset:s;margin:0 0 22px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(16px,2.4vw,32px)}
+.schritte li{counter-increment:s;border-top:1.5px solid var(--tinte);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.schritte li::before{content:counter(s,decimal-leading-zero);font:12px/1 var(--mono);letter-spacing:.14em;color:var(--stift)}
+.schritte b{font:500 19px/1.2 var(--syne);letter-spacing:-.005em}
+.schritte span{font:15px/1.55 var(--serif);color:var(--text2)}
+.sp-nach{max-width:760px;margin:0 0 14px;font-size:18px;color:var(--tinte)}
+.spektral .klein{max-width:760px}
+@media (max-width:860px){.schritte{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.schritte{grid-template-columns:1fr}}
+/* Farbtreue: Teile, Beispiel, Farbtafeln, Kamera-JPEG (Messung 1.0) */
+.ca-teil{font:500 clamp(19px,2.2vw,23px)/1.25 var(--syne);margin:48px 0 6px}
+.ca-text{max-width:760px;color:var(--text2);margin:0 0 6px}
+.ca-max small{font-size:11px;margin-left:4px}
+.ca-val b{margin-right:0}
+.ca-beispiel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:26px;max-width:1100px}
+.ca-beispiel figure{margin:0;background:var(--abzug);padding:8px 8px 6px;box-shadow:0 1px 1px rgba(0,0,0,.07)}
+.ca-beispiel figcaption{font:12px/1.4 var(--mono);color:var(--dim);margin-top:6px}
+.ca-beispiel p{grid-column:1/-1;margin:0;max-width:820px}
+.ca-skala{display:inline-flex;align-items:center;gap:5px;margin-left:6px;vertical-align:middle}
+.ca-skala i{display:inline-block;width:70px;height:8px;border-radius:4px;background:linear-gradient(90deg,#000004,#3b0f70 20%,#8c2981 40%,#de4968 60%,#fe9f6d 80%,#fcfdbf)}
+.cc-tafeln{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px 14px;margin-top:20px}
+.cc{margin:0}
+.cc-felder{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:4px;background:#121110;border-radius:2px}
+.cc-felder i{display:block;aspect-ratio:1;background:linear-gradient(var(--s) 50%,var(--g) 50%)}
+.cc figcaption{font:12px/1.4 var(--mono);color:var(--dim);margin-top:5px;display:flex;justify-content:space-between;gap:8px}
+.cc figcaption b{color:var(--tinte);font-weight:500}
+.ca-tabelle{margin-top:18px;max-width:900px}
+.ca-tabelle td:first-child{width:24%}
+.ca-paar{display:grid;gap:3px}
+.ca-th .ca-paar{display:flex;gap:14px;flex-wrap:wrap}
+.ca-leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+i.neutral{background:#8d8676}i.look{background:var(--stift)}
+.ca-leer{background:repeating-linear-gradient(135deg,transparent 0 5px,var(--linie) 5px 6px)}
+.ca-funde{max-width:820px}
+.ca-fuss{margin-top:22px;max-width:900px;border-top:1px solid var(--linie);padding-top:10px}
+.ca-fuss p{margin:0 0 8px}
+@media (max-width:760px){.ca-beispiel{gap:6px}.ca-beispiel figure{padding:4px 4px 3px}.ca-beispiel figcaption{font-size:10px;overflow-wrap:anywhere}.ca-skala i{width:36px}.ca-paar{grid-column:1/3;order:3}.ca-th .ca-paar{display:none}}
+@media (min-width:761px){.ca-row{grid-template-columns:200px 50px minmax(0,1fr) 110px 140px}}
+
+/* Kennzahlen: große Zahl, eine Zeile Bedeutung (scripts/site_grafiken.py, _kacheln) */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 clamp(40px,7vw,80px)}
+.kpi{background:var(--abzug);box-shadow:0 1px 1px rgba(0,0,0,.07);padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px}
+.kpi b{font:500 clamp(30px,3.6vw,44px)/1 var(--syne);color:var(--tinte);white-space:nowrap;letter-spacing:-.01em}
+.kpi span{font:13px/1.45 var(--mono);color:var(--text2)}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.kpi{padding:14px}.kpi b{font-size:28px}}
+
+/* Grafiken der Messwerte (scripts/site_grafiken.py): Raster aus Name | Spur | Wert, Marken in % der Achse.
+   Zonen und Raster liegen in .gr-ebene hinter allen Spuren. */
+:root{--gr-raster:rgba(28,27,24,.10);--gr-ok:#4f9a66;--gr-near:#b8a83a;--gr-mid:#d08a3c}
+.gr{margin:26px 0 0;max-width:980px}
+.gr-plot{position:relative;--n:210px;--w:56px;--gap:16px}
+.gr-ebene{position:absolute;top:0;bottom:22px;left:calc(var(--n) + var(--gap));right:calc(var(--w) + var(--gap));pointer-events:none;
+  background-image:linear-gradient(to right,var(--gr-raster) 1px,transparent 1px);background-size:var(--gr-schritt,10%) 100%;box-shadow:inset -1px 0 var(--gr-raster)}
+.gr-ebene i{position:absolute;top:0;bottom:0;display:block}
+.gr-zone.ok{background:color-mix(in srgb,var(--gr-ok) 17%,transparent)}
+.gr-zone.near{background:color-mix(in srgb,var(--gr-near) 19%,transparent)}
+.gr-zone.mid{background:color-mix(in srgb,var(--gr-mid) 15%,transparent)}
+.gr-zone span{position:absolute;top:6px;left:8px;right:4px;font:11px/1.2 var(--mono);color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gr-lineal .gr-plot{padding-top:30px}
+.gr-zeile{position:relative;display:grid;grid-template-columns:var(--n) minmax(0,1fr) var(--w);column-gap:var(--gap);align-items:center;min-height:36px}
+.gr-zeile[title]:hover .gr-name{text-decoration:underline;text-decoration-color:var(--linie);text-underline-offset:3px}
+.gr-name{font:13px/1.25 var(--mono);color:var(--tinte);min-width:0}
+.gr-name small{display:block;font-size:11px;color:var(--dim)}
+.gr-wert{font:13px/1.2 var(--mono);color:var(--dim);text-align:right;white-space:nowrap}
+.gr-wert b{color:var(--tinte);font-weight:500;font-size:15px}
+.gr-spur{position:relative;height:22px}
+.gr-spur>*{position:absolute;display:block}
+.gr-balken{left:0;top:3px;height:16px;border-radius:0 4px 4px 0;min-width:3px;background:var(--tinte)}
+.gr-am{top:3px;margin-left:8px;font:500 13px/16px var(--mono);color:var(--tinte);white-space:nowrap}
+.gr-tempo .gr-plot{--w:0px}
+.gr-punkt{top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--tinte);box-shadow:0 0 0 2px var(--papier)}
+.gr-achse{min-height:22px}
+.gr-achse>span:first-child{font:11px var(--mono);color:var(--dim);text-align:right}
+.gr-tick{position:absolute;top:5px;transform:translateX(-50%);font:11px/1 var(--mono);color:var(--dim);white-space:nowrap}
+.gr-tick.a{transform:none}.gr-tick.e{transform:translateX(-100%)}
+.gr figcaption{font:13px/1.55 var(--mono);color:var(--text2);margin-top:12px;max-width:820px}
+.gr-zahlen{margin-top:22px;max-width:980px}
+.gr-zahlen>summary{display:inline-block;cursor:pointer;font:12px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding:6px 0;list-style:none;border-bottom:1px solid var(--linie)}
+.gr-zahlen>summary::-webkit-details-marker{display:none}
+.gr-zahlen>summary::before{content:"+";display:inline-block;width:14px}
+.gr-zahlen[open]>summary::before{content:"–"}
+.gr-zahlen>summary:hover{color:var(--tinte)}
+.gr-zahlen>summary:focus-visible{outline:2px solid var(--blau);outline-offset:2px}
+.gr-zahlen .modelle{margin-top:10px}
+.gr-zahlen .klein{margin-top:8px;max-width:820px}
+.gr-zahlen h4{font:500 15px/1.3 var(--mono);margin:28px 0 0;color:var(--tinte)}
+/* Farbtreue: andere Kameras – Kernaussage neben einer Farbtafel */
+.ca-andere{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:14px clamp(24px,5vw,56px);align-items:start;max-width:980px;margin-top:48px}
+.ca-andere .ca-teil{margin-top:0}
+.ca-eine figcaption{flex-wrap:wrap}.ca-eine figcaption small{flex-basis:100%;font-size:11px}
+@media (max-width:600px){
+  .ca-andere{grid-template-columns:minmax(0,1fr)}.ca-eine{max-width:240px}
+  .gr-plot{--n:0px;--w:0px;--gap:0px}
+  .gr-zeile{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n w" "s s";column-gap:12px;min-height:0;padding:4px 0 2px}
+  .gr-zeile .gr-name{grid-area:n}.gr-zeile .gr-wert{grid-area:w}.gr-zeile .gr-spur{grid-area:s}
+  .gr-name small{display:inline;margin-left:6px}
+  .gr-achse{grid-template-areas:"s s"}.gr-achse>span{display:none}
+  .gr-spur{margin:0 6px}.gr-ebene{left:6px;right:6px}
+  .gr-zone span{left:4px;font-size:10px}
+}
+
+/* Farbtafeln im Leuchtkasten: gezeichnet, scharf in jeder Größe */
+.cc[data-tafel]{cursor:zoom-in}
+.cc[data-tafel]:focus-visible{outline:2px solid var(--stift);outline-offset:3px}
+.cc[data-tafel]:hover .cc-felder{box-shadow:0 0 0 2px var(--stift)}
+.cc-hinweis{color:var(--dim)}
+.cc figcaption small.cc-hinweis{flex-basis:100%;font-size:11px}
+#lb .tafel{--tb:min(calc(100vw - 132px),calc((100dvh - 290px)*1.5),980px);width:var(--tb);display:flex;flex-direction:column;align-items:stretch;gap:14px}
+#lb .t-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+#lb .t-kam{font-size:clamp(18px,3.2vw,30px);font-weight:500;line-height:1.2}
+#lb .t-de{font-size:clamp(22px,4.4vw,44px);font-weight:500;line-height:1;color:var(--kante);white-space:nowrap}
+#lb .t-felder{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(3px,.6vw,8px);padding:clamp(4px,.8vw,10px);background:#121110;border-radius:3px}
+#lb .t-felder i{display:block;aspect-ratio:1;background:linear-gradient(var(--s) 50%,var(--g) 50%)}
+#lb .t-leg{font-size:13px;color:#b9b2a3}
+#lb.tafelansicht .unten .kam,#lb.tafelansicht .unten .fx{display:none}
+@media (max-width:600px){#lb .tafel{--tb:calc(100vw - 32px)}}
+
+/* Kernaussagen mit Bereichs-Diagramm (Farbtreue) */
+.gr-kern{max-width:980px}
+.gr-aussage{font:500 17px/1.35 var(--mono);color:var(--tinte);margin:30px 0 0}
+.gr-kern .gr{margin-top:10px}
+.gr-zone.jb{background:color-mix(in srgb,var(--tinte) 11%,transparent);border-left:1px solid var(--gr-raster);border-right:1px solid var(--gr-raster)}
+.gr-tafel .gr-plot{--w:64px;padding-top:46px}
+.gr-zone.jb span{white-space:normal;line-height:1.25;right:6px}
+.gr-bereich{top:50%;height:4px;margin-top:-2px;background:var(--tinte);opacity:.55;border-radius:2px}
+.gr-punkt{width:18px;height:18px;margin:-9px 0 0 -9px}
+.gr-punkt.klein{width:11px;height:11px;margin:-5.5px 0 0 -5.5px}
+@media (max-width:600px){.gr-zone.jb span{white-space:normal;font-size:10px;line-height:1.15}}
+
+/* RAW & Foveon: Einstieg mit Vorher/Nachher (SIGMA Photo Pro | graineo) statt Kennzahlen */
+.einstieg{max-width:1100px;margin:0 0 clamp(8px,2vw,16px)}
+.ein-satz{max-width:720px;margin:0 0 4px;font:clamp(15px,1.6vw,17px)/1.55 var(--mono);color:var(--tinte)}
+.einstieg .vgl-abzug{margin:clamp(16px,2.4vw,24px) 0 clamp(40px,7vw,80px)}
+.vgl .gross{position:absolute;top:10px;right:10px;z-index:2;display:flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border:1px solid rgba(242,239,230,.5);background:rgba(8,8,10,.55);color:#f2efe6;cursor:zoom-in}
+.vgl .gross:hover{background:rgba(8,8,10,.8)}
+.vgl .gross:focus-visible{outline:2px solid var(--kante);outline-offset:2px}
+/* schmal: der Streifen wäre zu flach – Ausschnitt 2:1 um die Insel */
+@media (max-width:600px){.einstieg .vgl>img,.einstieg .vgl .oben img{aspect-ratio:2/1;object-fit:cover;object-position:32% 50%}}
+@media (max-width:520px){.vgl .marke{bottom:8px;font-size:10px;letter-spacing:.08em;padding:5px 6px}.vgl .marke.l{left:8px}.vgl .marke.r{right:8px}.vgl .gross{top:8px;right:8px;width:36px;height:36px}}
+
+/* Filmvergleich */
+.filmvergleich{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.4vw,28px);margin-top:clamp(16px,3vw,28px)}
+@media (max-width:700px){.filmvergleich{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.filmvergleich figure{margin:0}
+.fv-titel{margin-top:clamp(40px,6vw,64px)}
+.chips[data-chips="einstieg"]{margin:clamp(12px,2vw,18px) 0 0}
+.vor[hidden],.weiter[hidden]{display:none!important}
+.held .unterzeile{font:400 clamp(18px,2.1vw,23px)/1.4 var(--serif);font-style:italic;color:var(--tinte);margin:-4px 0 18px;max-width:560px}
+#who .gruss{font:400 clamp(18px,2vw,21px)/1.45 var(--serif);font-style:italic;color:var(--tinte);margin:22px 0 4px}
+#who .rolle{font:400 13px/1.4 var(--mono);color:var(--dim);margin:0}
+
+</style>
+</head>
+<body>
+<!--INHALT:ANFANG-->
+<div class="rb" lang="en">
+<a class="weg" href="#inhalt">Skip to content</a>
+<div class="seite">
+
+  <header class="kopf" id="top">
+    <a href="../" aria-label="graineo – Start"><svg viewBox="17 -725 3570 947" class="wm" role="img" aria-label="graineo"><defs><mask id="wm1" maskUnits="userSpaceOnUse" x="3075.28" y="-438.22" width="377.44" height="377.44"><circle cx="3264" cy="-249.5" r="174.16" fill="#fff"/><path d="M3233.68,-302.02 L3294.32,-302.02 L3414.71,-302.02 A159.6 159.6 0 0 0 3293.87,-406.28 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3203.35,-249.5 L3233.68,-302.02 L3293.87,-406.28 A159.6 159.6 0 0 0 3143.16,-353.76 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3294.32,-302.02 L3324.65,-249.5 L3384.84,-145.24 A159.6 159.6 0 0 0 3414.71,-302.02 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3233.68,-196.98 L3203.35,-249.5 L3143.16,-353.76 A159.6 159.6 0 0 0 3113.29,-196.98 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3324.65,-249.5 L3294.32,-196.98 L3234.13,-92.72 A159.6 159.6 0 0 0 3384.84,-145.24 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3294.32,-196.98 L3233.68,-196.98 L3113.29,-196.98 A159.6 159.6 0 0 0 3234.13,-92.72 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/></mask></defs><path d="M264 -78Q202 -78 150.0 -103.0Q98 -128 67.5 -176.0Q37 -224 37 -292Q37 -359 67.0 -407.5Q97 -456 148.5 -482.5Q200 -509 264 -509Q283 -509 300.0 -506.5Q317 -504 333 -499H551V-409Q506 -409 460.5 -424.0Q415 -439 381 -456L378 -461Q412 -443 437.0 -417.5Q462 -392 475.5 -360.5Q489 -329 489 -290Q489 -224 459.5 -176.0Q430 -128 378.5 -103.0Q327 -78 264 -78ZM417 202V179Q417 128 389.0 106.0Q361 84 307 84H190Q153 84 127.0 78.0Q101 72 84.0 60.5Q67 49 59.0 32.5Q51 16 51 -4Q51 -43 75.0 -63.0Q99 -83 136.0 -88.5Q173 -94 211 -89L264 -78Q207 -75 177.0 -67.0Q147 -59 147 -33Q147 -18 159.0 -9.0Q171 0 193 0H315Q372 0 416.5 14.5Q461 29 486.5 63.5Q512 98 512 158V202ZM264 -159Q300 -159 329.5 -174.5Q359 -190 377.0 -219.5Q395 -249 395 -291Q395 -334 377.5 -364.5Q360 -395 330.0 -410.5Q300 -426 264 -426Q228 -426 197.5 -410.5Q167 -395 149.0 -365.0Q131 -335 131 -291Q131 -249 149.0 -219.5Q167 -190 197.0 -174.5Q227 -159 264 -159Z M642 -499H738V0H642ZM907 -414Q855 -414 818.5 -390.0Q782 -366 760.5 -331.0Q739 -296 732 -264L731 -321Q732 -331 736.5 -352.5Q741 -374 753.0 -401.0Q765 -428 785.0 -452.5Q805 -477 835.0 -493.0Q865 -509 907 -509Z M1200 10Q1136 10 1083.0 -23.0Q1030 -56 999.0 -114.5Q968 -173 968 -249Q968 -325 999.5 -383.5Q1031 -442 1086.0 -475.5Q1141 -509 1209 -509Q1284 -509 1325.5 -474.0Q1367 -439 1383.5 -380.0Q1400 -321 1400 -249Q1400 -209 1390.0 -164.0Q1380 -119 1358.0 -79.0Q1336 -39 1297.0 -14.5Q1258 10 1200 10ZM1227 -73Q1280 -73 1316.5 -96.5Q1353 -120 1371.0 -160.0Q1389 -200 1389 -249Q1389 -302 1370.5 -342.0Q1352 -382 1315.5 -404.0Q1279 -426 1227 -426Q1149 -426 1106.5 -376.0Q1064 -326 1064 -249Q1064 -197 1085.0 -157.5Q1106 -118 1142.5 -95.5Q1179 -73 1227 -73ZM1389 -499H1485V0H1397Q1397 0 1395.0 -18.5Q1393 -37 1391.0 -63.0Q1389 -89 1389 -109Z M1725 -705V-602H1606V-705ZM1618 -499H1713V0H1618Z M1848 -499H1944V0H1848ZM2134 -509Q2176 -509 2210.0 -497.0Q2244 -485 2268.0 -461.5Q2292 -438 2305.5 -403.5Q2319 -369 2319 -325V0H2224V-304Q2224 -363 2195.5 -392.5Q2167 -422 2109 -422Q2064 -422 2027.0 -401.0Q1990 -380 1966.5 -345.5Q1943 -311 1938 -268L1937 -323Q1942 -363 1958.5 -397.0Q1975 -431 2000.5 -456.5Q2026 -482 2060.0 -495.5Q2094 -509 2134 -509Z M2830 -162H2921Q2913 -113 2883.0 -74.0Q2853 -35 2804.0 -12.0Q2755 11 2689 11Q2611 11 2550.0 -22.0Q2489 -55 2454.0 -113.0Q2419 -171 2419 -248Q2419 -326 2453.0 -384.5Q2487 -443 2547.0 -476.0Q2607 -509 2684 -509Q2765 -509 2820.0 -477.0Q2875 -445 2901.5 -382.5Q2928 -320 2923 -227H2514Q2519 -182 2541.5 -147.0Q2564 -112 2601.5 -92.0Q2639 -72 2688 -72Q2743 -72 2780.0 -97.0Q2817 -122 2830 -162ZM2685 -427Q2620 -427 2577.0 -392.5Q2534 -358 2520 -301H2827Q2823 -362 2783.0 -394.5Q2743 -427 2685 -427Z M3265 11Q3192 11 3131.0 -20.0Q3070 -51 3034.0 -109.0Q2998 -167 2998 -248Q2998 -330 3034.0 -388.5Q3070 -447 3131.0 -478.0Q3192 -509 3265 -509Q3338 -509 3398.0 -478.0Q3458 -447 3494.0 -388.5Q3530 -330 3530 -248Q3530 -167 3494.0 -109.0Q3458 -51 3398.0 -20.0Q3338 11 3265 11ZM3265 -72Q3310 -72 3348.5 -92.5Q3387 -113 3410.5 -152.5Q3434 -192 3434 -248Q3434 -305 3410.5 -345.0Q3387 -385 3348.5 -406.0Q3310 -427 3265 -427Q3220 -427 3181.0 -406.5Q3142 -386 3118.0 -346.0Q3094 -306 3094 -248Q3094 -192 3117.5 -152.5Q3141 -113 3180.0 -92.5Q3219 -72 3265 -72Z" fill="currentColor"/><g mask="url(#wm1)"><path d="M3233.68,-302.02 L3294.32,-302.02 L3414.71,-302.02 A159.6 159.6 0 0 0 3293.87,-406.28 Z" fill="#306EBF"/><path d="M3203.35,-249.5 L3233.68,-302.02 L3293.87,-406.28 A159.6 159.6 0 0 0 3143.16,-353.76 Z" fill="#306EBF"/><path d="M3294.32,-302.02 L3324.65,-249.5 L3384.84,-145.24 A159.6 159.6 0 0 0 3414.71,-302.02 Z" fill="#6AA665"/><path d="M3233.68,-196.98 L3203.35,-249.5 L3143.16,-353.76 A159.6 159.6 0 0 0 3113.29,-196.98 Z" fill="#6AA665"/><path d="M3324.65,-249.5 L3294.32,-196.98 L3234.13,-92.72 A159.6 159.6 0 0 0 3384.84,-145.24 Z" fill="#DD4D2F"/><path d="M3294.32,-196.98 L3233.68,-196.98 L3113.29,-196.98 A159.6 159.6 0 0 0 3234.13,-92.72 Z" fill="#DD4D2F"/></g></svg></a>
+    <div class="rechts">
+      <nav class="hauptnav" aria-label="Sections"><button type="button" class="menuknopf" aria-expanded="false" aria-controls="menueliste"><span>Menu</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5h12M2 8h12M2 11.5h12"/></svg></button><div class="menueliste" id="menueliste"><a href="../raw-foveon/">RAW &amp; Foveon</a><a href="../library/">Library</a><a href="../film/">Film</a><a href="../under-the-hood/" aria-current="page">Under the hood</a><a href="../features/">Features</a><a href="../about/">About</a></div></nav>
+      <div class="sprachen"><button type="button" class="sprachknopf" aria-expanded="false" aria-label="Language: English"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6.2"/><path d="M1.8 8h12.4M8 1.8c2.2 2 2.2 10.4 0 12.4M8 1.8c-2.2 2-2.2 10.4 0 12.4"/></svg><span>EN</span><svg class="pfeil" viewBox="0 0 10 10" width="9" height="9" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5l3 3 3-3"/></svg></button><ul class="sprachliste"><li><a href="../../en/under-the-hood/" hreflang="en" lang="en" data-sprache="en" aria-current="true">English</a></li><li><a href="../../de/under-the-hood/" hreflang="de" lang="de" data-sprache="de">Deutsch</a></li><li><a href="../../fr/under-the-hood/" hreflang="fr" lang="fr" data-sprache="fr">Français</a></li><li><a href="../../es/under-the-hood/" hreflang="es" lang="es" data-sprache="es">Español</a></li><li><a href="../../ja/under-the-hood/" hreflang="ja" lang="ja" data-sprache="ja">日本語</a></li></ul></div>
+    </div>
+  </header>
+<main id="inhalt">
+  <div class="seitenkopf">
+    <div class="notiz">graineo</div>
+    <h1>Under the hood</h1>
+    <p class="lead">How fast it is, what runs where, what goes online, what your computer needs.</p>
+  </div>
+  <div class="kpis"><div class="kpi"><b>0.5 s</b><span>Merrill: to the first picture</span></div><div class="kpi"><b>1.1 s</b><span>Merrill: full quality</span></div><div class="kpi"><b>&lt; 1 s</b><span>first picture for any camera up to 30 MP</span></div><div class="kpi"><b>&lt; 40 ms</b><span>after each slider – feels instant</span></div></div>
+
+  <div class="unter" id="speed" style="display:block">
+    <h3>How fast it is</h3>
+    <!-- Messwerte: Kennzahlen, Grafik und Tabelle aus site-neu/daten/messung.json (scripts/site_grafiken.py) -->
+    <figure class="gr gr-tempo"><div class="gr-plot" role="img" aria-label="Seconds to full quality per camera class: Older Sigma 0.9 s; Sigma Merrill 1.1 s; Canon, Sony 2.9 s; Fujifilm X-Trans 3.2 s; Sigma Quattro 3.3 s; Medium format 8.1 s" style="--gr-schritt:10.0000%"><div class="gr-ebene" aria-hidden="true"></div><div class="gr-zeile" title="Older Sigma: 0.9 s · DP1s, SD15" aria-hidden="true"><div class="gr-name">Older Sigma <small>4.6 MP</small></div><div class="gr-spur"><i class="gr-balken" style="width:8.57%"></i><span class="gr-am" style="left:8.57%">0.9 s</span></div><div class="gr-wert"></div></div><div class="gr-zeile" title="Sigma Merrill: 1.1 s · DP2 Merrill" aria-hidden="true"><div class="gr-name">Sigma Merrill <small>15 MP</small></div><div class="gr-spur"><i class="gr-balken" style="width:11.24%"></i><span class="gr-am" style="left:11.24%">1.1 s</span></div><div class="gr-wert"></div></div><div class="gr-zeile" title="Canon, Sony: 2.9 s · Canon EOS R, Sony α7 III" aria-hidden="true"><div class="gr-name">Canon, Sony <small>24–30 MP</small></div><div class="gr-spur"><i class="gr-balken" style="width:29.03%"></i><span class="gr-am" style="left:29.03%">2.9 s</span></div><div class="gr-wert"></div></div><div class="gr-zeile" title="Fujifilm X-Trans: 3.2 s · Fujifilm X-T30" aria-hidden="true"><div class="gr-name">Fujifilm X-Trans <small>26 MP</small></div><div class="gr-spur"><i class="gr-balken" style="width:31.60%"></i><span class="gr-am" style="left:31.60%">3.2 s</span></div><div class="gr-wert"></div></div><div class="gr-zeile" title="Sigma Quattro: 3.3 s · sd Quattro, dp2 Quattro" aria-hidden="true"><div class="gr-name">Sigma Quattro <small>20 MP</small></div><div class="gr-spur"><i class="gr-balken" style="width:33.25%"></i><span class="gr-am" style="left:33.25%">3.3 s</span></div><div class="gr-wert"></div></div><div class="gr-zeile" title="Medium format: 8.1 s · Fujifilm GFX100 II" aria-hidden="true"><div class="gr-name">Medium format <small>102 MP</small></div><div class="gr-spur"><i class="gr-balken" style="width:80.91%"></i><span class="gr-am" style="left:80.91%">8.1 s</span></div><div class="gr-wert"></div></div><div class="gr-zeile gr-achse" aria-hidden="true"><span>s</span><div class="gr-spur"><span class="gr-tick a" style="left:0.00%">0</span><span class="gr-tick" style="left:10.00%">1</span><span class="gr-tick" style="left:20.00%">2</span><span class="gr-tick" style="left:30.00%">3</span><span class="gr-tick" style="left:40.00%">4</span><span class="gr-tick" style="left:50.00%">5</span><span class="gr-tick" style="left:60.00%">6</span><span class="gr-tick" style="left:70.00%">7</span><span class="gr-tick" style="left:80.00%">8</span><span class="gr-tick" style="left:90.00%">9</span><span class="gr-tick e" style="left:100.00%">10</span></div><span></span></div></div><figcaption>Seconds from click to full quality. The first picture appears in under a second for any camera up to 30 MP.</figcaption></figure>
+    <details class="gr-zahlen" id="messung">
+      <summary>How it was measured &amp; all figures</summary>
+      <div class="modelle"><table><thead><tr><th>Camera</th><th>Open to first picture</th><th>Full quality</th><th>After a slider</th><th>Full-size export (JPEG)</th></tr></thead><tbody><tr><td data-l="Camera">DP2 Merrill <small>(Sigma Merrill, 15 MP)</small></td><td data-l="Open to first picture">0.5 s</td><td data-l="Full quality">1.1 s</td><td data-l="After a slider">14 ms</td><td data-l="Full-size export (JPEG)">1.3 s</td></tr><tr><td data-l="Camera">sd Quattro <small>(Sigma Quattro, 20 MP)</small></td><td data-l="Open to first picture">1.0 s</td><td data-l="Full quality">3.3 s</td><td data-l="After a slider">8 ms</td><td data-l="Full-size export (JPEG)">2.5 s</td></tr><tr><td data-l="Camera">dp2 Quattro <small>(Sigma Quattro, 20 MP)</small></td><td data-l="Open to first picture">0.9 s</td><td data-l="Full quality">3.4 s</td><td data-l="After a slider">10 ms</td><td data-l="Full-size export (JPEG)">2.7 s</td></tr><tr><td data-l="Camera">DP1s <small>(Sigma Classic, 4.6 MP)</small></td><td data-l="Open to first picture">0.8 s</td><td data-l="Full quality">0.8 s</td><td data-l="After a slider">22 ms</td><td data-l="Full-size export (JPEG)">0.9 s</td></tr><tr><td data-l="Camera">SD15 <small>(Sigma Classic, 4.6 MP)</small></td><td data-l="Open to first picture">0.9 s</td><td data-l="Full quality">0.9 s</td><td data-l="After a slider">21 ms</td><td data-l="Full-size export (JPEG)">0.9 s</td></tr><tr><td data-l="Camera">Fujifilm X-T30 <small>(X-Trans, 26 MP)</small></td><td data-l="Open to first picture">0.6 s</td><td data-l="Full quality">3.2 s<sup>†</sup></td><td data-l="After a slider">36 ms</td><td data-l="Full-size export (JPEG)">2.0 s</td></tr><tr><td data-l="Camera">Canon EOS R <small>(Bayer, 30 MP)</small></td><td data-l="Open to first picture">1.0 s</td><td data-l="Full quality">3.1 s<sup>†</sup></td><td data-l="After a slider">29 ms</td><td data-l="Full-size export (JPEG)">1.9 s</td></tr><tr><td data-l="Camera">Sony α7 III <small>(Bayer, 24 MP)</small></td><td data-l="Open to first picture">0.6 s</td><td data-l="Full quality">2.7 s<sup>†</sup></td><td data-l="After a slider">33 ms</td><td data-l="Full-size export (JPEG)">1.4 s</td></tr><tr><td data-l="Camera">Fujifilm GFX100 II <small>(Bayer, 102 MP)</small></td><td data-l="Open to first picture">1.4 s</td><td data-l="Full quality">8.1 s<sup>†</sup></td><td data-l="After a slider">83 ms</td><td data-l="Full-size export (JPEG)">9.1 s</td></tr></tbody></table></div><p class="klein"><sup>†</sup> Fujifilm and other RAWs: the very first picture is already fully developed; “full quality” here means full resolution for 100 %.</p>
+      <p class="klein">Measured with <span class="name">graineo</span> 1.0 on a MacBook Pro (Apple M1 Pro, 16 GB), macOS 26, files on the internal SSD. First opening of a new photo, median of five runs; the export includes starting the app. Older computers, Intel Macs and network drives are slower. Measuring script: werkzeuge/messen/zeiten/.</p>
+    </details>
+  </div>
+
+  <!-- 4 Lokal -->
+  <section class="abschnitt um oben" id="local">
+    <figure class="abzug" data-zoom data-bildschirmfoto="import" data-cam="graineo" data-fx="Import, checked twice"><img src="../../img/features/import.jpg" alt="Import dialog with the choice to add in place, copy or move" loading="lazy" width="1500" height="844"><figcaption><span>SHA-256</span>Import, checked twice</figcaption></figure>
+    <div class="text">
+      <div class="label">No. 4 · Local</div>
+      <h2>Local. Safe. Fast.</h2>
+      <p>No account, no cloud. Originals stay untouched, the library is backed up daily. Quiet in the background, fast when you look.</p>
+    </div>
+  </section>
+
+  <div class="unter" id="privacy" style="display:block">
+    <h3>What goes online</h3>
+    <p style="max-width:820px">Nothing about you or your photos. The only things that go online: a daily update check with GitHub (can be switched off; GitHub sees your IP address), a one-time download of the image models (with a fixed checksum), and originals from iCloud via macOS. “Report a Problem…” only opens a report in your browser; you decide whether to send it.</p>
+  </div>
+
+  <div class="unter" id="hood" style="display:block">
+    <h3>Under the hood</h3>
+    <ul class="liste" style="max-width:820px"><li><b>Faces</b> are found by Apple Vision on the Neural Engine; recognition and search run on small networks through Apple's Accelerate. No faces on Windows yet.</li><li><b>The graphics card</b> (wgpu, Metal on the Mac): noise reduction, X-Trans, sharpening, lens correction, film, masks, display. The processor handles the rest, and everything when there is no graphics card.</li><li><b>Full resolution where you look:</b> at 100 % only the visible area; the next pictures in the folder are already waiting.</li><li><b>HDR:</b> brighter than paper white on Macs with an EDR display.</li><li><b>Safe updates:</b> only with a valid Ed25519 signature and SHA-256 checksum, swapped in one step. If the new version does not start, the old one comes back.</li></ul>
+    <h3 style="margin-top:36px" id="image-models">Image models</h3>
+    <p style="max-width:820px">Pictures and sentences in the same “space of meaning”: “dog on a beach” finds photos without any keyword. Three levels, chosen in Settings.</p>
+    <div class="modelle"><table><thead><tr><th>Model</th><th>What it does</th><th>Size</th><th>Runs on</th></tr></thead><tbody><tr><td data-l="Model"><b>Standard</b> · CLIP ViT-B/32 with a multilingual text encoder (OpenAI, sentence-transformers; MIT, Apache-2.0)</td><td data-l="What it does">Search in your own words, “similar photos”, similar duplicates. Over 50 languages.</td><td data-l="Size">1.15 GB · 550 MB memory · ~60 ms per photo</td><td data-l="Runs on">Processor (Accelerate)</td></tr><tr><td data-l="Model"><b>Multilingual</b> · M-CLIP text encoder (XLM-RoBERTa large; MIT) with the same CLIP image vectors</td><td data-l="What it does">Understands queries in other languages better; photos need not be read again.</td><td data-l="Size">+1.13 GB · 640 MB memory</td><td data-l="Runs on">Processor (Accelerate)</td></tr><tr><td data-l="Model"><b>Best matches</b> · SigLIP 2 Base (Google; Apache-2.0)</td><td data-l="What it does">Reads every photo once more, more precisely. 109 languages, the best results.</td><td data-l="Size">1.5 GB · 410–480 MB memory · ~270 ms per photo</td><td data-l="Runs on">Processor (Accelerate)</td></tr><tr><td data-l="Model"><b>Finding faces</b> · Apple Vision</td><td data-l="What it does">Finds faces.</td><td data-l="Size">part of macOS, no download</td><td data-l="Runs on">Neural Engine, Mac only</td></tr><tr><td data-l="Model"><b>Recognising faces</b> · SFace / MobileFaceNet (OpenCV Zoo; Apache-2.0)</td><td data-l="What it does">Turns each face into 128 numbers to find it again.</td><td data-l="Size">37 MB</td><td data-l="Runs on">Processor (Accelerate)</td></tr></tbody></table></div>
+    <p class="klein" style="margin-top:12px;max-width:820px">All freely licensed, downloaded only when you switch the feature on, verified by checksum, then offline. Measured on an Apple M1 Pro, 16 GB; times are upper limits.</p>
+  </div>
+
+
+  <div class="unter" id="requirements" style="display:block">
+    <h3>System requirements</h3>
+    <ul class="liste" style="max-width:820px"><li>macOS 12 Monterey or later</li><li>Apple Silicon or Intel</li><li>Memory: 8 GB or more, 16 GB recommended</li><li>Disk space: 3 GB or more, 20 GB recommended; previews take about 5 GB per 10,000 photos (can be limited)</li><li>Windows: an experimental build exists</li><li>Free, no account, GPL-3.0</li></ul>
+    <p class="klein" style="margin-top:12px;max-width:820px">App about 90 MB, image models 1.2 GB (only if you use them), library 130 MB per 10,000 photos. Fully developing a Merrill file takes about 1 GB of memory, a 50 MP export up to 5 GB; measured with <span class="name">graineo</span> 1.0.</p>
+  </div>
+
+</main>
+  <footer class="fuss">
+    <svg viewBox="17 -725 3570 947" class="wm" role="img" aria-label="graineo"><defs><mask id="wm2" maskUnits="userSpaceOnUse" x="3075.28" y="-438.22" width="377.44" height="377.44"><circle cx="3264" cy="-249.5" r="174.16" fill="#fff"/><path d="M3233.68,-302.02 L3294.32,-302.02 L3414.71,-302.02 A159.6 159.6 0 0 0 3293.87,-406.28 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3203.35,-249.5 L3233.68,-302.02 L3293.87,-406.28 A159.6 159.6 0 0 0 3143.16,-353.76 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3294.32,-302.02 L3324.65,-249.5 L3384.84,-145.24 A159.6 159.6 0 0 0 3414.71,-302.02 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3233.68,-196.98 L3203.35,-249.5 L3143.16,-353.76 A159.6 159.6 0 0 0 3113.29,-196.98 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3324.65,-249.5 L3294.32,-196.98 L3234.13,-92.72 A159.6 159.6 0 0 0 3384.84,-145.24 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/><path d="M3294.32,-196.98 L3233.68,-196.98 L3113.29,-196.98 A159.6 159.6 0 0 0 3234.13,-92.72 Z" fill="none" stroke="#000" stroke-width="14.56" stroke-linejoin="round"/></mask></defs><path d="M264 -78Q202 -78 150.0 -103.0Q98 -128 67.5 -176.0Q37 -224 37 -292Q37 -359 67.0 -407.5Q97 -456 148.5 -482.5Q200 -509 264 -509Q283 -509 300.0 -506.5Q317 -504 333 -499H551V-409Q506 -409 460.5 -424.0Q415 -439 381 -456L378 -461Q412 -443 437.0 -417.5Q462 -392 475.5 -360.5Q489 -329 489 -290Q489 -224 459.5 -176.0Q430 -128 378.5 -103.0Q327 -78 264 -78ZM417 202V179Q417 128 389.0 106.0Q361 84 307 84H190Q153 84 127.0 78.0Q101 72 84.0 60.5Q67 49 59.0 32.5Q51 16 51 -4Q51 -43 75.0 -63.0Q99 -83 136.0 -88.5Q173 -94 211 -89L264 -78Q207 -75 177.0 -67.0Q147 -59 147 -33Q147 -18 159.0 -9.0Q171 0 193 0H315Q372 0 416.5 14.5Q461 29 486.5 63.5Q512 98 512 158V202ZM264 -159Q300 -159 329.5 -174.5Q359 -190 377.0 -219.5Q395 -249 395 -291Q395 -334 377.5 -364.5Q360 -395 330.0 -410.5Q300 -426 264 -426Q228 -426 197.5 -410.5Q167 -395 149.0 -365.0Q131 -335 131 -291Q131 -249 149.0 -219.5Q167 -190 197.0 -174.5Q227 -159 264 -159Z M642 -499H738V0H642ZM907 -414Q855 -414 818.5 -390.0Q782 -366 760.5 -331.0Q739 -296 732 -264L731 -321Q732 -331 736.5 -352.5Q741 -374 753.0 -401.0Q765 -428 785.0 -452.5Q805 -477 835.0 -493.0Q865 -509 907 -509Z M1200 10Q1136 10 1083.0 -23.0Q1030 -56 999.0 -114.5Q968 -173 968 -249Q968 -325 999.5 -383.5Q1031 -442 1086.0 -475.5Q1141 -509 1209 -509Q1284 -509 1325.5 -474.0Q1367 -439 1383.5 -380.0Q1400 -321 1400 -249Q1400 -209 1390.0 -164.0Q1380 -119 1358.0 -79.0Q1336 -39 1297.0 -14.5Q1258 10 1200 10ZM1227 -73Q1280 -73 1316.5 -96.5Q1353 -120 1371.0 -160.0Q1389 -200 1389 -249Q1389 -302 1370.5 -342.0Q1352 -382 1315.5 -404.0Q1279 -426 1227 -426Q1149 -426 1106.5 -376.0Q1064 -326 1064 -249Q1064 -197 1085.0 -157.5Q1106 -118 1142.5 -95.5Q1179 -73 1227 -73ZM1389 -499H1485V0H1397Q1397 0 1395.0 -18.5Q1393 -37 1391.0 -63.0Q1389 -89 1389 -109Z M1725 -705V-602H1606V-705ZM1618 -499H1713V0H1618Z M1848 -499H1944V0H1848ZM2134 -509Q2176 -509 2210.0 -497.0Q2244 -485 2268.0 -461.5Q2292 -438 2305.5 -403.5Q2319 -369 2319 -325V0H2224V-304Q2224 -363 2195.5 -392.5Q2167 -422 2109 -422Q2064 -422 2027.0 -401.0Q1990 -380 1966.5 -345.5Q1943 -311 1938 -268L1937 -323Q1942 -363 1958.5 -397.0Q1975 -431 2000.5 -456.5Q2026 -482 2060.0 -495.5Q2094 -509 2134 -509Z M2830 -162H2921Q2913 -113 2883.0 -74.0Q2853 -35 2804.0 -12.0Q2755 11 2689 11Q2611 11 2550.0 -22.0Q2489 -55 2454.0 -113.0Q2419 -171 2419 -248Q2419 -326 2453.0 -384.5Q2487 -443 2547.0 -476.0Q2607 -509 2684 -509Q2765 -509 2820.0 -477.0Q2875 -445 2901.5 -382.5Q2928 -320 2923 -227H2514Q2519 -182 2541.5 -147.0Q2564 -112 2601.5 -92.0Q2639 -72 2688 -72Q2743 -72 2780.0 -97.0Q2817 -122 2830 -162ZM2685 -427Q2620 -427 2577.0 -392.5Q2534 -358 2520 -301H2827Q2823 -362 2783.0 -394.5Q2743 -427 2685 -427Z M3265 11Q3192 11 3131.0 -20.0Q3070 -51 3034.0 -109.0Q2998 -167 2998 -248Q2998 -330 3034.0 -388.5Q3070 -447 3131.0 -478.0Q3192 -509 3265 -509Q3338 -509 3398.0 -478.0Q3458 -447 3494.0 -388.5Q3530 -330 3530 -248Q3530 -167 3494.0 -109.0Q3458 -51 3398.0 -20.0Q3338 11 3265 11ZM3265 -72Q3310 -72 3348.5 -92.5Q3387 -113 3410.5 -152.5Q3434 -192 3434 -248Q3434 -305 3410.5 -345.0Q3387 -385 3348.5 -406.0Q3310 -427 3265 -427Q3220 -427 3181.0 -406.5Q3142 -386 3118.0 -346.0Q3094 -306 3094 -248Q3094 -192 3117.5 -152.5Q3141 -113 3180.0 -92.5Q3219 -72 3265 -72Z" fill="currentColor"/><g mask="url(#wm2)"><path d="M3233.68,-302.02 L3294.32,-302.02 L3414.71,-302.02 A159.6 159.6 0 0 0 3293.87,-406.28 Z" fill="#306EBF"/><path d="M3203.35,-249.5 L3233.68,-302.02 L3293.87,-406.28 A159.6 159.6 0 0 0 3143.16,-353.76 Z" fill="#306EBF"/><path d="M3294.32,-302.02 L3324.65,-249.5 L3384.84,-145.24 A159.6 159.6 0 0 0 3414.71,-302.02 Z" fill="#6AA665"/><path d="M3233.68,-196.98 L3203.35,-249.5 L3143.16,-353.76 A159.6 159.6 0 0 0 3113.29,-196.98 Z" fill="#6AA665"/><path d="M3324.65,-249.5 L3294.32,-196.98 L3234.13,-92.72 A159.6 159.6 0 0 0 3384.84,-145.24 Z" fill="#DD4D2F"/><path d="M3294.32,-196.98 L3233.68,-196.98 L3113.29,-196.98 A159.6 159.6 0 0 0 3234.13,-92.72 Z" fill="#DD4D2F"/></g></svg>
+    <div>
+      <p><a href="../#get">Get <span class="name">graineo</span></a> · <a href="../about/#who">Who is behind it</a> · Contact: <a href="https://github.com/graineo/graineo/issues">GitHub Issues</a> · <a href="https://github.com/graineo/graineo">github.com/graineo/graineo</a></p>
+      <p><span class="name">graineo</span> 1.0 · macOS 12 or later, Apple Silicon and Intel · Windows experimental · GPL-3.0</p>
+      <p>SIGMA, Foveon and SIGMA Photo Pro are trademarks of Sigma Corporation; Fujifilm, X-Trans, Kodak, Ilford, Apple, Adobe, Lightroom, ColorChecker and the film names mentioned are trademarks of their respective owners. <span class="name">graineo</span> is not affiliated with or endorsed by any of them, nor by Imaging Resource.</p>
+      <div class="sprachen"><button type="button" class="sprachknopf" aria-expanded="false" aria-label="Language: English"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6.2"/><path d="M1.8 8h12.4M8 1.8c2.2 2 2.2 10.4 0 12.4M8 1.8c-2.2 2-2.2 10.4 0 12.4"/></svg><span>EN</span><svg class="pfeil" viewBox="0 0 10 10" width="9" height="9" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5l3 3 3-3"/></svg></button><ul class="sprachliste"><li><a href="../../en/under-the-hood/" hreflang="en" lang="en" data-sprache="en" aria-current="true">English</a></li><li><a href="../../de/under-the-hood/" hreflang="de" lang="de" data-sprache="de">Deutsch</a></li><li><a href="../../fr/under-the-hood/" hreflang="fr" lang="fr" data-sprache="fr">Français</a></li><li><a href="../../es/under-the-hood/" hreflang="es" lang="es" data-sprache="es">Español</a></li><li><a href="../../ja/under-the-hood/" hreflang="ja" lang="ja" data-sprache="ja">日本語</a></li></ul></div>
+    </div>
+    <div class="stempel">Free<br>No account<br>GPL-3.0</div>
+  </footer>
+</div>
+</div>
+
+
+<div id="lb" role="dialog" aria-modal="true" aria-label="Large picture" lang="en">
+  <button type="button" class="zu" aria-label="Close">×</button>
+  <button type="button" class="vor" aria-label="Previous picture">‹</button>
+  <button type="button" class="weiter" aria-label="Next picture">›</button>
+  <div class="bildfeld"><img alt=""><div class="tafel" hidden><div class="t-kopf" aria-live="polite"><span class="t-kam"></span><span class="t-de"></span></div><div class="t-felder"></div><div class="t-leg">reference on top, <span class="name">graineo</span> below</div></div><div class="vgl" hidden><img class="a" alt=""><img class="b" alt=""><div class="c a"><div class="ebene"></div></div><div class="c b"><div class="ebene"></div></div><span class="lbl l">RAW</span><span class="lbl r"></span><div class="griff"><i></i></div></div></div>
+  <div class="unten"><div class="kam"></div><div class="fx"></div><button type="button" class="hundert" hidden>100 %</button><div class="zahl"></div></div>
+</div>
+<!--INHALT:ENDE-->
+<script>
+/* graineo Projektseite – Verhalten (Vorher/Nachher, Leuchtkasten, Filter, Sprachwahl).
+   graineoStart(wurzel) darf mehrfach laufen (Vorschau rendert bei jedem Sprachwechsel neu). */
+var graineoStart = (function () {
+  var lbZustand = null; // aktueller Leuchtkasten, für die einmal angemeldeten Tasten
+
+  function abschnittJetzt(wurzel) {
+    var id = '', teile = wurzel.querySelectorAll('section[id], div.unter[id], figure[id], header[id]');
+    for (var i = 0; i < teile.length; i++) {
+      if (teile[i].getBoundingClientRect().top <= 120) id = teile[i].id;
+    }
+    return id;
+  }
+
+  function vergleich(wurzel) {
+    [].forEach.call(wurzel.querySelectorAll('[data-vgl]'), function (f) {
+      var r = f.querySelector('input');
+      function set() { f.style.setProperty('--p', r.value + '%'); }
+      r.addEventListener('input', set); set();
+    });
+  }
+
+  function einstieg(wurzel) {
+    var ch = wurzel.querySelector('[data-chips="einstieg"]');
+    if (!ch) return;
+    var fig = ch.parentNode.querySelector('.vgl-abzug'), a = fig.querySelector('.vgl>img'), b = fig.querySelector('.vgl .oben img'), g = fig.querySelector('button.gross'), sp = fig.querySelector('[data-ein-kamera]');
+    ch.addEventListener('click', function (e) {
+      var k = e.target.closest('button'); if (!k) return; var n = k.getAttribute('data-ein'), alt = k.getAttribute('data-alt-g');
+      [].forEach.call(ch.querySelectorAll('button'), function (x) { x.classList.toggle('an', x === k); x.setAttribute('aria-pressed', x === k ? 'true' : 'false'); });
+      var p = a.getAttribute('src').replace(/ein-[a-z0-9]+-graineo\.jpg.*$/, '');
+      a.src = p + 'ein-' + n + '-graineo.jpg'; b.src = p + 'ein-' + n + '-sigma.jpg'; a.alt = alt + ' – graineo'; b.alt = alt + ' – SIGMA Photo Pro';
+      g.setAttribute('data-serie-start', [].indexOf.call(ch.querySelectorAll('button'), k));
+      sp.textContent = k.getAttribute('data-span');
+    });
+  }
+
+  function filter(wurzel) {
+    var fch = wurzel.querySelector('[data-chips="funktionen"]');
+    if (fch) fch.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return; var g = b.getAttribute('data-g');
+      [].forEach.call(fch.querySelectorAll('button'), function (x) { x.classList.toggle('an', x === b); });
+      [].forEach.call(wurzel.querySelectorAll('#all-features .fgroup'), function (f) { f.hidden = !(g === 'all' || f.getAttribute('data-g') === g); });
+    });
+    var chips = wurzel.querySelector('[data-chips="galerie"]');
+    if (!chips) return;
+    var art = 'alle', mk = null;
+    function filtern() {
+      [].forEach.call(wurzel.querySelectorAll('#gallery figure'), function (f) {
+        f.hidden = !((art === 'alle' || f.getAttribute('data-art') === art) && (!mk || f.getAttribute('data-marke') === mk));
+      });
+      [].forEach.call(chips.querySelectorAll('button'), function (b) {
+        b.classList.toggle('an', b.hasAttribute('data-f') ? (b.getAttribute('data-f') === art && !mk) : (b.getAttribute('data-m') === mk));
+      });
+    }
+    chips.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-f')) { art = b.getAttribute('data-f'); mk = null; }
+      else { mk = (mk === b.getAttribute('data-m')) ? null : b.getAttribute('data-m'); if (mk) art = 'alle'; }
+      filtern();
+    });
+  }
+
+  function leuchtkasten(wurzel) {
+    var lb = wurzel.querySelector('#lb'); if (!lb) return;
+    var all = [].slice.call(wurzel.querySelectorAll('[data-zoom],[data-tafel]'));
+    var tafel = lb.querySelector('.tafel'), tKam = tafel.querySelector('.t-kam'), tDe = tafel.querySelector('.t-de'), tFelder = tafel.querySelector('.t-felder');
+    var img = lb.querySelector('.bildfeld>img'), kam = lb.querySelector('.kam'), fx = lb.querySelector('.fx'), zahl = lb.querySelector('.zahl');
+    var feld = lb.querySelector('.bildfeld'), vgl = lb.querySelector('.vgl'), va = vgl.querySelector('img.a'), vb = vgl.querySelector('img.b'), griff = vgl.querySelector('.griff'), lbr = vgl.querySelector('.lbl.r'), hb = lb.querySelector('.hundert');
+    var lbl = vgl.querySelector('.lbl.l'), lblStd = lbl.textContent;
+    var cb = vgl.querySelector('.c.b'), ea = vgl.querySelector('.c.a .ebene'), eb = cb.querySelector('.ebene');
+    var liste = [], cur = 0, letzter = null, teil = 0.5, m100 = false, px = 0, py = 0, fb = 0, fh = 0, tb = 0, th = 0, fig = null, kach = {}, TS = 512;
+    function clip() { var c = 'inset(0 0 0 ' + (teil * 100) + '%)'; vb.style.clipPath = c; cb.style.clipPath = c; griff.style.left = (teil * 100) + '%'; }
+    function aufraeumen(x0, x1, y0, y1) {
+      [ea, eb].forEach(function (e) { [].slice.call(e.children).forEach(function (i) { var x = +i.dataset.x, y = +i.dataset.y; if (x < x0 - 2 || x > x1 + 2 || y < y0 - 2 || y > y1 + 2) { e.removeChild(i); delete kach[x + '_' + y]; } }); });
+    }
+    function kachel() {
+      if (!m100 || !fig) return;
+      var base = fig.getAttribute('data-tiles'), w = vgl.clientWidth, h = vgl.clientHeight;
+      var x0 = Math.max(0, Math.floor((px - TS) / TS)), x1 = Math.min(Math.ceil(tb / TS) - 1, Math.floor((px + w + TS) / TS));
+      var y0 = Math.max(0, Math.floor((py - TS) / TS)), y1 = Math.min(Math.ceil(th / TS) - 1, Math.floor((py + h + TS) / TS));
+      aufraeumen(x0, x1, y0, y1);
+      for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) {
+        var k = x + '_' + y; if (kach[k]) continue; kach[k] = 1;
+        [[ea, 'n'], [eb, 'f']].forEach(function (q) { var i = new Image(); i.decoding = 'async'; i.src = base + '/' + q[1] + '/' + k + '.jpg?v=10'; i.dataset.x = x; i.dataset.y = y; i.style.left = (x * TS) + 'px'; i.style.top = (y * TS) + 'px'; q[0].appendChild(i); });
+      }
+    }
+    function leeren() { kach = {}; ea.textContent = ''; eb.textContent = ''; }
+    function layout() {
+      if (!fig || vgl.hidden) return;
+      var W = feld.clientWidth, H = feld.clientHeight, w, h;
+      if (m100) {
+        if (!tb) return;
+        w = Math.min(W, tb); h = Math.min(H, th);
+        px = Math.max(0, Math.min(px, tb - w)); py = Math.max(0, Math.min(py, th - h));
+        var tr = 'translate(' + (-px) + 'px,' + (-py) + 'px)'; ea.style.transform = tr; eb.style.transform = tr;
+      } else {
+        if (!fb) return;
+        var s = Math.min(W / fb, H / fh, 1); w = Math.round(fb * s); h = Math.round(fh * s);
+        [va, vb].forEach(function (i) { i.style.width = w + 'px'; i.style.height = h + 'px'; });
+      }
+      vgl.style.width = w + 'px'; vgl.style.height = h + 'px';
+      vgl.classList.toggle('m100', m100); vgl.classList.toggle('pan', m100); clip(); kachel();
+    }
+    function lade() { fb = 0; va.src = fig.getAttribute('data-neutral'); vb.onload = function () { fb = vb.naturalWidth; fh = vb.naturalHeight; layout(); }; vb.src = fig.getAttribute('data-full'); }
+    function modus(an) {
+      m100 = an; hb.classList.toggle('an', an); hb.setAttribute('aria-pressed', an ? 'true' : 'false');
+      if (an) { leeren(); tb = +fig.getAttribute('data-tw'); th = +fig.getAttribute('data-th'); px = Math.round((tb - feld.clientWidth) / 2); py = Math.round((th - feld.clientHeight) / 2); }
+      layout();
+    }
+    hb.addEventListener('click', function (e) { e.stopPropagation(); modus(!m100); });
+    var zug = null;
+    vgl.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); vgl.setPointerCapture(e.pointerId);
+      var r = vgl.getBoundingClientRect();
+      if (e.target === griff || griff.contains(e.target)) zug = { art: 'teil' };
+      else if (m100) { zug = { art: 'pan', x: e.clientX, y: e.clientY, px: px, py: py }; vgl.classList.add('zieht'); }
+      else { zug = { art: 'teil' }; teil = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); clip(); }
+    });
+    vgl.addEventListener('pointermove', function (e) {
+      if (!zug) return;
+      if (zug.art === 'teil') { var r = vgl.getBoundingClientRect(); teil = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); clip(); }
+      else { px = zug.px - (e.clientX - zug.x); py = zug.py - (e.clientY - zug.y); layout(); }
+    });
+    function los() { zug = null; vgl.classList.remove('zieht'); }
+    vgl.addEventListener('pointerup', los); vgl.addEventListener('pointercancel', los);
+    vgl.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+    vgl.addEventListener('touchend', function (e) { e.stopPropagation(); });
+    function gruppe(f) { var g = f.closest('[data-lbgroup]'); return g ? g.getAttribute('data-lbgroup') : 'seite'; }
+    function zeigeTafel(f) {
+      fig = f; lb.classList.remove('serienansicht'); lb.classList.add('tafelansicht');
+      m100 = false; leeren(); vgl.hidden = true; img.hidden = true; hb.hidden = true;
+      var name = f.getAttribute('data-cam') || '', b = f.querySelector('figcaption b'), de = b ? b.textContent : '';
+      tKam.textContent = name; tDe.textContent = 'ΔE ' + de;
+      tFelder.textContent = '';
+      [].forEach.call(f.querySelectorAll('.cc-felder i'), function (i) { tFelder.appendChild(i.cloneNode(false)); });
+      tafel.hidden = false; tafel.setAttribute('role', 'img'); tafel.setAttribute('aria-label', (f.querySelector('.cc-felder').getAttribute('aria-label') || '') + ' ' + name + ', ΔE ' + de);
+      kam.textContent = name; fx.textContent = ''; zahl.textContent = (cur + 1) + ' / ' + liste.length;
+      lb.setAttribute('aria-label', name + ', ΔE ' + de + ', ' + (cur + 1) + ' / ' + liste.length);
+    }
+    function zeige(i) {
+      cur = (i + liste.length) % liste.length;
+      var mehr = liste.length > 1; lb.querySelector('.vor').hidden = !mehr; lb.querySelector('.weiter').hidden = !mehr;
+      var ein = liste[cur].getAttribute('data-ein');
+      if (ein) { var kn = wurzel.querySelector('[data-chips="einstieg"] button[data-ein="' + ein + '"]'); if (kn && !kn.classList.contains('an')) kn.click(); }
+      var f = liste[cur], q = f.querySelector('img'); fig = f;
+      if (f.hasAttribute('data-tafel')) { zeigeTafel(f); return; }
+      tafel.hidden = true; lb.classList.remove('tafelansicht');
+      lb.classList.toggle('serienansicht', f.hasAttribute('data-alt'));
+      var mitVgl = f.hasAttribute('data-neutral');
+      m100 = false; leeren(); vgl.classList.remove('m100', 'pan'); hb.classList.remove('an'); hb.hidden = !f.hasAttribute('data-tiles'); vgl.hidden = !mitVgl; img.hidden = mitVgl;
+      if (mitVgl) { lbr.textContent = f.getAttribute('data-label') || ''; lbl.textContent = f.getAttribute('data-label-l') || lblStd; img.removeAttribute('src'); lade(); }
+      else img.src = f.getAttribute('data-full') || (q && q.getAttribute('src'));
+      img.alt = q ? q.alt : (f.getAttribute('data-alt') || '');
+      kam.textContent = f.getAttribute('data-cam') || ''; fx.textContent = f.getAttribute('data-fx') || '';
+      zahl.textContent = (cur + 1) + ' / ' + liste.length;
+      var n = liste[(cur + 1) % liste.length]; if (n && !n.hasAttribute('data-tafel')) { var pre = new Image(); pre.src = n.getAttribute('data-full') || n.querySelector('img').getAttribute('src'); }
+      lb.setAttribute('aria-label', (f.getAttribute('data-cam') || '') + ' ' + (cur + 1) + ' / ' + liste.length);
+    }
+    function auf(f) {
+      letzter = document.activeElement;
+      // Bildserie einer Funktion: die Liste kommt aus den versteckten Einträgen am Bild
+      var serie = f.hasAttribute('data-serie') ? [].slice.call(f.querySelectorAll('.serie > [data-full]')) : null;
+      if (f.hasAttribute('data-tafel')) {
+        liste = all.filter(function (x) { return x.hasAttribute('data-tafel') && !x.hasAttribute('data-dup'); });
+        var ziel = liste.filter(function (x) { return x.getAttribute('data-cam') === f.getAttribute('data-cam'); })[0];
+        sperren(true); lb.classList.add('open'); zeige(liste.indexOf(ziel)); lb.querySelector('.zu').focus({ preventScroll: true }); return;
+      }
+      liste = serie || all.filter(function (x) { return gruppe(x) === gruppe(f) && !x.hidden && x.offsetParent !== null; });
+      if (!liste.length) return;
+      sperren(true); lb.classList.add('open'); zeige(serie ? (+f.getAttribute('data-serie-start') || 0) : liste.indexOf(f)); lb.querySelector('.zu').focus({ preventScroll: true });
+    }
+    function zu() { lb.classList.remove('open'); sperren(false); if (letzter && letzter.focus) letzter.focus({ preventScroll: true }); }
+    // Seite hinter dem Leuchtkasten sperren und die Scrollposition genau zurückgeben
+    var gemerkt = null;
+    function sperren(an) {
+      var h = document.documentElement, b = document.body;
+      if (an) {
+        if (gemerkt) return;
+        gemerkt = { x: window.scrollX, y: window.scrollY, h: h.style.overflow, b: b.style.overflow, sb: h.style.scrollBehavior };
+        h.style.overflow = 'hidden'; b.style.overflow = 'hidden';
+      } else if (gemerkt) {
+        h.style.overflow = gemerkt.h; b.style.overflow = gemerkt.b;
+        h.style.scrollBehavior = 'auto'; window.scrollTo(gemerkt.x, gemerkt.y); h.style.scrollBehavior = gemerkt.sb;
+        gemerkt = null;
+      }
+    }
+    all.forEach(function (f) {
+      f.setAttribute('tabindex', '0'); f.setAttribute('role', 'button');
+      f.addEventListener('click', function () { auf(f); });
+      f.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); auf(f); } });
+    });
+    lb.querySelector('.zu').addEventListener('click', zu);
+    lb.querySelector('.vor').addEventListener('click', function (e) { e.stopPropagation(); zeige(cur - 1); });
+    lb.querySelector('.weiter').addEventListener('click', function (e) { e.stopPropagation(); zeige(cur + 1); });
+    lb.addEventListener('click', function (e) { if (e.target === lb || e.target === feld) zu(); });
+    var x0 = null;
+    lb.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', function (e) { if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 50) zeige(cur + (dx < 0 ? 1 : -1)); });
+    lb.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var k = [].filter.call(lb.querySelectorAll('button'), function (x) { return !x.hidden && x.offsetParent !== null; });
+      if (!k.length) return;
+      var i = k.indexOf(document.activeElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); k[k.length - 1].focus(); }
+      else if (!e.shiftKey && i === k.length - 1) { e.preventDefault(); k[0].focus(); }
+    });
+    lbZustand = { offen: function () { return lb.classList.contains('open'); }, zu: zu, schritt: function (d) { zeige(cur + d); }, layout: layout };
+  }
+
+  var angemeldet = false;
+  function einmal() {
+    if (angemeldet) return; angemeldet = true;
+    document.addEventListener('keydown', function (e) {
+      if (!lbZustand || !lbZustand.offen()) return;
+      var tasten = ['Escape', 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'];
+      if (e.key === ' ' && !(e.target && e.target.closest && e.target.closest('button'))) tasten.push(' ');
+      if (tasten.indexOf(e.key) < 0) return;   // Tab usw. bleiben dem Leuchtkasten (Fokusfalle)
+      e.preventDefault(); e.stopPropagation();
+      if (e.key === 'Escape') lbZustand.zu(); else if (e.key === 'ArrowRight') lbZustand.schritt(1); else if (e.key === 'ArrowLeft') lbZustand.schritt(-1);
+    }, true);
+    window.addEventListener('wheel', function (e) { if (lbZustand && lbZustand.offen()) e.preventDefault(); }, { passive: false });
+    window.addEventListener('touchmove', function (e) { if (lbZustand && lbZustand.offen() && !e.target.closest('.vgl')) e.preventDefault(); }, { passive: false });
+    window.addEventListener('resize', function () { if (lbZustand) lbZustand.layout(); });
+  }
+
+  /* Sprachwahl: zur selben Stelle der anderen Sprache. wechsel(l, id) übernimmt die Vorschau. */
+  function sprachwahl(wurzel, wechsel) {
+    [].forEach.call(wurzel.querySelectorAll('a[data-sprache]'), function (a) {
+      a.addEventListener('click', function (e) {
+        var id = abschnittJetzt(wurzel);
+        if (wechsel) { e.preventDefault(); wechsel(a.getAttribute('data-sprache'), id); return; }
+        if (id) { e.preventDefault(); location.href = a.getAttribute('href') + '#' + id; }
+      });
+    });
+  }
+
+  /* Kopfmenü (kompakt) und Sprachliste: Knopf öffnet, Esc/Klick außerhalb schließt, Pfeiltasten wandern. */
+  var kopfGlobal = false;
+  function zuKlappen(ausser) {
+    [].forEach.call(document.querySelectorAll('.sprachen.offen,.hauptnav.offen'), function (e) {
+      if (e === ausser) return;
+      e.classList.remove('offen');
+      var k = e.querySelector('button'); if (k) k.setAttribute('aria-expanded', 'false');
+    });
+  }
+  function klappen(wurzel) {
+    [].forEach.call(wurzel.querySelectorAll('.sprachen,.hauptnav'), function (box) {
+      var knopf = box.querySelector('button'), liste = box.querySelector('.sprachliste,.menueliste');
+      if (!knopf || !liste) return;
+      function eintraege() { return [].slice.call(liste.querySelectorAll('a')); }
+      function auf(fokus) {
+        zuKlappen(box); box.classList.add('offen'); knopf.setAttribute('aria-expanded', 'true');
+        var e = eintraege(); var ziel = fokus === 'ende' ? e[e.length - 1] : (e.filter(function (a) { return a.getAttribute('aria-current'); })[0] || e[0]);
+        if (fokus && ziel) ziel.focus();
+      }
+      function zu(zurueck) { box.classList.remove('offen'); knopf.setAttribute('aria-expanded', 'false'); if (zurueck) knopf.focus(); }
+      knopf.addEventListener('click', function (e) { e.stopPropagation(); if (box.classList.contains('offen')) zu(); else auf(); });
+      knopf.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown') { e.preventDefault(); auf(true); } else if (e.key === 'ArrowUp') { e.preventDefault(); auf('ende'); }
+      });
+      liste.addEventListener('keydown', function (e) {
+        var e2 = eintraege(), i = e2.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') { e.preventDefault(); e2[(i + 1) % e2.length].focus(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); e2[(i - 1 + e2.length) % e2.length].focus(); }
+        else if (e.key === 'Home') { e.preventDefault(); e2[0].focus(); }
+        else if (e.key === 'End') { e.preventDefault(); e2[e2.length - 1].focus(); }
+        else if (e.key === 'Escape') { e.preventDefault(); zu(true); }
+        else if (e.key === 'Tab') zu();
+      });
+      liste.addEventListener('click', function (e) { if (box.classList.contains('hauptnav') || e.target.closest('a')) zu(); });
+    });
+    if (kopfGlobal) return; kopfGlobal = true;
+    document.addEventListener('click', function (e) { if (!e.target.closest('.sprachen,.hauptnav')) zuKlappen(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') zuKlappen(); });
+  }
+
+  return function (wurzel, wechsel) {
+    vergleich(wurzel); einstieg(wurzel); filter(wurzel); leuchtkasten(wurzel); einmal(); sprachwahl(wurzel, wechsel); klappen(wurzel);
+  };
+})();
+
+
+graineoStart(document);
+</script>
+</body>
+</html>

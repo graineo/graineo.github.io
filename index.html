@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>graineo</title>
+<link rel="alternate" hreflang="en" href="https://graineo.github.io/en/">
+<link rel="alternate" hreflang="de" href="https://graineo.github.io/de/">
+<link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/">
+<link rel="alternate" hreflang="es" href="https://graineo.github.io/es/">
+<link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/">
+<link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/">
+<link rel="icon" type="image/svg+xml" href="img/icon.svg">
+<script>
+(function(){
+  var da=["en", "de", "fr", "es", "ja"], l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'en']);
+  for(var i=0;i<l.length;i++){var k=String(l[i]).toLowerCase().slice(0,2); if(da.indexOf(k)>=0){location.replace(k+'/'+location.hash);return;}}
+  location.replace('en/'+location.hash);
+})();
+</script>
+<style>body{margin:0;background:#ebe6da;color:#1c1b18;font:16px/1.6 ui-monospace,Menlo,monospace;display:flex;min-height:100vh;align-items:center;justify-content:center}ul{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center}a{color:inherit}</style>
+</head>
+<body>
+<main><p>graineo</p><ul><li><a href="en/" hreflang="en" lang="en">English</a></li><li><a href="de/" hreflang="de" lang="de">Deutsch</a></li><li><a href="fr/" hreflang="fr" lang="fr">Français</a></li><li><a href="es/" hreflang="es" lang="es">Español</a></li><li><a href="ja/" hreflang="ja" lang="ja">日本語</a></li></ul></main>
+</body>
+</html>
