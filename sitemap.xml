@@ -40,46 +40,6 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/"/>
   </url>
-  <url><loc>https://graineo.github.io/en/raw-foveon/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
-  </url>
-  <url><loc>https://graineo.github.io/de/raw-foveon/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
-  </url>
-  <url><loc>https://graineo.github.io/fr/raw-foveon/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
-  </url>
-  <url><loc>https://graineo.github.io/es/raw-foveon/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
-  </url>
-  <url><loc>https://graineo.github.io/ja/raw-foveon/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
-  </url>
   <url><loc>https://graineo.github.io/en/library/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/library/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/library/"/>
@@ -159,6 +119,46 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
+  </url>
+  <url><loc>https://graineo.github.io/en/raw-foveon/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
+  </url>
+  <url><loc>https://graineo.github.io/de/raw-foveon/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
+  </url>
+  <url><loc>https://graineo.github.io/fr/raw-foveon/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
+  </url>
+  <url><loc>https://graineo.github.io/es/raw-foveon/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
+  </url>
+  <url><loc>https://graineo.github.io/ja/raw-foveon/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
   </url>
   <url><loc>https://graineo.github.io/en/under-the-hood/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/under-the-hood/"/>
