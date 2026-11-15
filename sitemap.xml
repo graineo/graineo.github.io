@@ -80,46 +80,6 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/library/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/library/"/>
   </url>
-  <url><loc>https://graineo.github.io/en/film/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
-  </url>
-  <url><loc>https://graineo.github.io/de/film/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
-  </url>
-  <url><loc>https://graineo.github.io/fr/film/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
-  </url>
-  <url><loc>https://graineo.github.io/es/film/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
-  </url>
-  <url><loc>https://graineo.github.io/ja/film/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
-  </url>
   <url><loc>https://graineo.github.io/en/raw-foveon/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/raw-foveon/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/raw-foveon/"/>
@@ -159,6 +119,46 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/raw-foveon/"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/raw-foveon/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/raw-foveon/"/>
+  </url>
+  <url><loc>https://graineo.github.io/en/film/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
+  </url>
+  <url><loc>https://graineo.github.io/de/film/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
+  </url>
+  <url><loc>https://graineo.github.io/fr/film/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
+  </url>
+  <url><loc>https://graineo.github.io/es/film/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
+  </url>
+  <url><loc>https://graineo.github.io/ja/film/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/film/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/film/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/film/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/film/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/film/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/film/"/>
   </url>
   <url><loc>https://graineo.github.io/en/under-the-hood/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/under-the-hood/"/>
@@ -279,5 +279,45 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/about/"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/about/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/about/"/>
+  </url>
+  <url><loc>https://graineo.github.io/en/download/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/download/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/download/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/download/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/download/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/download/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/download/"/>
+  </url>
+  <url><loc>https://graineo.github.io/de/download/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/download/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/download/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/download/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/download/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/download/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/download/"/>
+  </url>
+  <url><loc>https://graineo.github.io/fr/download/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/download/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/download/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/download/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/download/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/download/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/download/"/>
+  </url>
+  <url><loc>https://graineo.github.io/es/download/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/download/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/download/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/download/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/download/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/download/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/download/"/>
+  </url>
+  <url><loc>https://graineo.github.io/ja/download/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://graineo.github.io/en/download/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://graineo.github.io/de/download/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://graineo.github.io/fr/download/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://graineo.github.io/es/download/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://graineo.github.io/ja/download/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://graineo.github.io/en/download/"/>
   </url>
 </urlset>
